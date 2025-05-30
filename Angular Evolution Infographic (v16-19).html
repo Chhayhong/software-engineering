@@ -58,6 +58,9 @@
             background-color: #F0F4F8; /* Light Grayish Blue */
             color: #1A202C; /* Dark Gray text */
         }
+        code {
+            font-weight: bold;
+        }
         .chart-card {
             background-color: white;
             border-radius: 0.75rem; /* 12px */
@@ -417,6 +420,36 @@
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
+        // Function to replace backtick-surrounded text with bold text using Markdown-style syntax
+        document.addEventListener('DOMContentLoaded', function() {
+            const replaceInNode = (node) => {
+                if (node.nodeType === 3) { // Text node
+                    const text = node.textContent;
+                    if (text.includes('`')) {
+                        const fragment = document.createDocumentFragment();
+                        const parts = text.split(/(`[^`]+`)/g);
+                        
+                        parts.forEach(part => {
+                            if (part.startsWith('`') && part.endsWith('`')) {
+                                const bold = document.createElement('strong');
+                                bold.textContent = part.slice(1, -1) + '  '; // Remove backticks and add space
+                                fragment.appendChild(bold);
+                            } else {
+                                fragment.appendChild(document.createTextNode(part));
+                            }
+                        });
+                        
+                        node.parentNode.replaceChild(fragment, node);
+                    }
+                } else if (node.nodeType === 1) { // Element node
+                    Array.from(node.childNodes).forEach(replaceInNode);
+                }
+            };
+
+            // Start the replacement from the body
+            replaceInNode(document.body);
+        });
+
         function wrapLabel(label, maxWidth = 16) {
             if (typeof label !== 'string' || label.length <= maxWidth) {
                 return label;
@@ -490,7 +523,7 @@
             bgLightGrayishBlue: '#F0F4F8'
         };
 
-        new Chart(document.getElementById('signalsImpactChart'), {
+        const signalsChart = new Chart(document.getElementById('signalsImpactChart'), {
             type: 'doughnut',
             data: {
                 labels: ['Simplified State Mgt', 'Improved Readability', 'Performance Gains', 'Reduced Boilerplate'],
@@ -505,7 +538,7 @@
             options: { ...commonChartOptions, cutout: '60%' }
         });
 
-        new Chart(document.getElementById('hydrationCwvChart'), {
+        const hydrationChart = new Chart(document.getElementById('hydrationCwvChart'), {
             type: 'bar',
             data: {
                 labels: ['LCP Improvement', 'CLS Reduction', 'FID Improvement'],
@@ -519,7 +552,7 @@
             options: { ...commonChartOptions, indexAxis: 'y', scales: { ...commonChartOptions.scales, x: {...commonChartOptions.scales.x, beginAtZero: true, max: 40}, y: {...commonChartOptions.scales.y, ticks: {...commonChartOptions.scales.y.ticks, callback: function(value) { return this.getLabelForValue(value);}}} }}
         });
         
-        new Chart(document.getElementById('standaloneAdoptionChart'), {
+        const adoptionChart = new Chart(document.getElementById('standaloneAdoptionChart'), {
             type: 'line',
             data: {
                 labels: ['Angular v14 (Intro)', 'v16 (Schematics)', 'v17 (Default Gen)', 'v19 (Full Default)'],
@@ -535,7 +568,7 @@
             options: {...commonChartOptions, scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, beginAtZero: true, max: 100}} }
         });
 
-        new Chart(document.getElementById('controlFlowPerformanceChart'), {
+        const flowChart = new Chart(document.getElementById('controlFlowPerformanceChart'), {
             type: 'bar',
             data: {
                 labels: ['Old *ngFor', 'New @for Syntax'],
@@ -549,7 +582,7 @@
             options: { ...commonChartOptions, scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, beginAtZero: true, max: 100}} }
         });
 
-        new Chart(document.getElementById('zonelessBenefitsChart'), {
+        const zonelessChart = new Chart(document.getElementById('zonelessBenefitsChart'), {
             type: 'bar',
             data: {
                 labels: [wrapLabel('Bundle Size Reduction'), wrapLabel('Initial Render Speedup'), wrapLabel('Runtime Perf. Impr.')],
@@ -563,7 +596,7 @@
             options: { ...commonChartOptions, scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, beginAtZero: true, max: 30}} }
         });
 
-        new Chart(document.getElementById('signalApiMaturityChart'), {
+        const apiMaturityChart = new Chart(document.getElementById('signalApiMaturityChart'), {
             type: 'bar',
             data: {
                 labels: [wrapLabel('v16 (Preview)'), wrapLabel('v17 (input())'), wrapLabel('v18 (Stable Core)'), wrapLabel('v19 (Most Stable + Exp.)')],
