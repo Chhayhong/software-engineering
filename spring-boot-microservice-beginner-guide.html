@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Microservices: A Comprehensive Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #EFF6FF; /* Light Blue Background from Brilliant Blues palette (adjusted) */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Default max-width, can be overridden by Tailwind */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; 
+            max-height: 400px; /* Default max-height */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .kpi-card {
+            background-color: #FFFFFF;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #003F5C; /* Dark Blue */
+        }
+        .kpi-label {
+            font-size: 1rem;
+            color: #7A5195; /* Purple */
+        }
+        .section-title {
+            color: #003F5C; /* Dark Blue */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #003F5C; /* Dark Blue */
+            color: white;
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .card-content {
+            padding: 1.5rem;
+        }
+        .flow-step {
+            background-color: #E0E7FF; /* Light indigo */
+            border: 2px solid #7A5195; /* Purple */
+            color: #003F5C; /* Dark Blue */
+        }
+        .flow-arrow {
+            color: #7A5195; /* Purple */
+        }
+        /* Palette: Brilliant Blues */
+        /* Primary Text/Dark Backgrounds: #003F5C (Dark Blue) */
+        /* Secondary Text/Medium Accents: #7A5195 (Purple) */
+        /* Highlight/Chart Accents 1: #EF5675 (Pink/Red) */
+        /* Highlight/Chart Accents 2: #FFA600 (Orange) */
+        /* Additional Chart Colors: #BC5090 (Magenta), #FF764A (Coral) */
+        .text-palette-primary { color: #003F5C; }
+        .bg-palette-primary { background-color: #003F5C; }
+        .border-palette-primary { border-color: #003F5C; }
+
+        .text-palette-secondary { color: #7A5195; }
+        .bg-palette-secondary { background-color: #7A5195; }
+        .border-palette-secondary { border-color: #7A5195; }
+        
+        .text-palette-accent1 { color: #EF5675; }
+        .bg-palette-accent1 { background-color: #EF5675; }
+        .border-palette-accent1 { border-color: #EF5675; }
+
+        .text-palette-accent2 { color: #FFA600; }
+        .bg-palette-accent2 { background-color: #FFA600; }
+        .border-palette-accent2 { border-color: #FFA600; }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- 
+    Infographic Plan Summary:
+    The infographic follows the lifecycle of Spring Boot microservices development and deployment.
+    Sections:
+    1.  Hook/Introduction: Why Microservices? Why Spring Boot?
+    2.  Laying the Foundation (Development Setup): Initializr, Starters, Configuration.
+    3.  Building Blocks (Core Concepts): REST APIs, Data Persistence (E-R-S-C).
+    4.  Connecting the Dots (Inter-Service Comm & Discovery): Sync/Async, Service Discovery, API Gateway.
+    5.  Ensuring Robustness (Resilience & Healing): Circuit Breaker, Kubernetes Self-Healing.
+    6.  Streamlining Delivery (CI/CD): Dockerization, Testing Strategies, CI/CD Tools.
+    7.  Reaching the Cloud (Deployment): Cloud Models, Kubernetes Deployment, Cloud Platforms.
+    8.  Keeping a Watchful Eye (Monitoring & Observability): Actuator, Metrics, Tracing, Logging.
+    9.  Fortifying the System (Security): Spring Security, Data Security, Vulnerability Management.
+    10. The Road Ahead (Conclusion/Future): Key takeaways, future trends.
+
+    Visualization Choices Summary (All Chart.js charts use Canvas. Diagrams use HTML/CSS. No SVG, No Mermaid JS):
+    - Advantages of Microservices: HTML/CSS list with Unicode icons. Goal: Inform.
+    - Spring Boot Popularity: "Big Number" text. Goal: Inform.
+    - Core Principles Diagram: HTML/CSS boxes. Goal: Organize.
+    - Spring Initializr Steps: HTML/CSS flow. Goal: Organize.
+    - Build Tool Usage (Illustrative): Chart.js Donut. Goal: Compare.
+    - Essential Starters (Illustrative): Chart.js Bar. Goal: Compare.
+    - Config Precedence Table: HTML Table. Goal: Organize.
+    - REST API Best Practices: HTML/CSS list. Goal: Organize.
+    - E-R-S-C Pattern Diagram: HTML/CSS boxes. Goal: Organize.
+    - Database Usage (Illustrative): Chart.js Pie. Goal: Compare.
+    - Sync vs. Async Table: HTML Table. Goal: Compare.
+    - Service Discovery Tool Comparison (Illustrative): Chart.js Grouped Bar. Goal: Compare.
+    - API Gateway Functions: HTML/CSS list. Goal: Organize.
+    - Circuit Breaker States Diagram: HTML/CSS boxes. Goal: Organize.
+    - Kubernetes Self-Healing Features: HTML/CSS list. Goal: Inform.
+    - Dockerizing Best Practices: HTML/CSS list. Goal: Organize.
+    - Testing Pyramid: HTML/CSS Pyramid. Goal: Organize.
+    - CI/CD Tool Comparison Table: HTML Table. Goal: Compare.
+    - Cloud Models Comparison: HTML/CSS cards. Goal: Compare.
+    - Kubernetes Deployment Objects Diagram: HTML/CSS boxes. Goal: Organize.
+    - Platform Services Table: HTML Table. Goal: Compare.
+    - Actuator Endpoints List: HTML/CSS list. Goal: Inform.
+    - Monitoring Stack Diagram: HTML/CSS boxes. Goal: Organize.
+    - Tracing Tool Comparison (Illustrative): Chart.js Bar. Goal: Compare.
+    - Logging Tools Comparison: HTML Table. Goal: Compare.
+    - OAuth2/JWT Flow Diagram: HTML/CSS boxes. Goal: Organize.
+    - Data Security Tips: HTML/CSS list. Goal: Inform.
+
+    Confirmation: NEITHER Mermaid JS NOR SVG were used anywhere in this output.
+    -->
+
+    <header class="bg-palette-primary text-white py-12 text-center">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">The Comprehensive Guide to Spring Boot Microservices</h1>
+            <p class="text-xl md:text-2xl opacity-90">An Infographic Journey: From Development to Operational Excellence</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="introduction" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">I. The Microservices Revolution with Spring Boot</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="card">
+                    <div class="card-header">Why Microservices? The Key Advantages</div>
+                    <div class="card-content space-y-3">
+                        <p class="text-gray-700 mb-4">Microservices structure applications as collections of loosely coupled, independently deployable services, offering significant benefits over monolithic architectures.</p>
+                        <ul class="list-none space-y-3">
+                            <li class="flex items-start"><span class="text-palette-accent2 text-2xl mr-3">⚙️</span> <div><strong class="text-palette-primary">Simplified Maintenance:</strong> Smaller, focused codebases are easier to understand and manage.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent2 text-2xl mr-3">🚀</span> <div><strong class="text-palette-primary">Increased Productivity:</strong> Teams can develop and deploy services in parallel, accelerating delivery.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent2 text-2xl mr-3">🛡️</span> <div><strong class="text-palette-primary">Greater Fault Tolerance:</strong> Failure in one service doesn't necessarily bring down the entire system.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent2 text-2xl mr-3">🎯</span> <div><strong class="text-palette-primary">Domain Alignment:</strong> Services can be clearly mapped to specific business capabilities.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent2 text-2xl mr-3">⚖️</span> <div><strong class="text-palette-primary">Enhanced Scalability:</strong> Individual services can be scaled independently based on demand.</div></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Spring Boot: The Microservice Enabler</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Spring Boot has become the de facto standard for Java microservices, streamlining development with its opinionated approach, auto-configuration, and starters.</p>
+                        <div class="kpi-card mb-6">
+                            <div class="kpi-value">#1 Choice</div>
+                            <div class="kpi-label">For Java Microservices</div>
+                        </div>
+                        <p class="text-gray-700">Its core strengths lie in accelerating production-ready applications, reducing boilerplate, and simplifying dependency management, allowing developers to focus on business logic.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-8">
+                <div class="card-header">Core Principles of Spring Boot Microservices Architecture</div>
+                <div class="card-content">
+                    <p class="text-gray-700 mb-6 text-center">A robust microservices ecosystem relies on several interconnected architectural principles for resilience and manageability.</p>
+                    <div class="flex flex-wrap justify-center items-center gap-4">
+                        <div class="flow-step p-3 rounded-md text-sm text-center shadow">Service Discovery</div>
+                        <div class="flow-arrow text-2xl font-bold hidden md:block">↔️</div>
+                        <div class="flow-step p-3 rounded-md text-sm text-center shadow">API Gateway</div>
+                        <div class="flow-arrow text-2xl font-bold hidden md:block">↔️</div>
+                        <div class="flow-step p-3 rounded-md text-sm text-center shadow">Config Management</div>
+                        <div class="flow-arrow text-2xl font-bold hidden md:block">↔️</div>
+                        <div class="flow-step p-3 rounded-md text-sm text-center shadow">Circuit Breakers</div>
+                        <div class="flow-arrow text-2xl font-bold hidden md:block">↔️</div>
+                        <div class="flow-step p-3 rounded-md text-sm text-center shadow">Monitoring & Logging</div>
+                    </div>
+                    <p class="text-gray-600 mt-4 text-sm text-center">These principles are not isolated but work in concert to create a stable and effective distributed system.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="developing" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">II. Laying the Foundation: Development Setup</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card lg:col-span-1">
+                    <div class="card-header">Bootstrapping with Spring Initializr</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Spring Initializr (`start.spring.io`) automates project setup, drastically reducing time-to-first-commit.</p>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                            <li>Select Build Tool (Maven/Gradle) & Language.</li>
+                            <li>Choose Spring Boot Version.</li>
+                            <li>Add Essential Dependencies (Starters).</li>
+                            <li>Generate & Download Project.</li>
+                            <li>Import into IDE.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="card lg:col-span-1">
+                    <div class="card-header">Build Tool Preference (Illustrative)</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Maven and Gradle are the primary build tools for Spring Boot projects.</p>
+                        <div class="chart-container h-64 max-h-72"><canvas id="buildToolsChart"></canvas></div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">Illustrative data based on general industry observations.</p>
+                    </div>
+                </div>
+                <div class="card lg:col-span-1">
+                    <div class="card-header">Essential Spring Boot Starters (Illustrative)</div>
+                    <div class="card-content">
+                         <p class="text-gray-700 mb-4">Starters simplify dependency management by bundling common libraries.</p>
+                        <div class="chart-container h-64 max-h-72"><canvas id="startersChart"></canvas></div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">Illustrative popularity of common starters.</p>
+                    </div>
+                </div>
+                <div class="card md:col-span-2 lg:col-span-3">
+                    <div class="card-header">Externalized Configuration: Precedence Matters</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Spring Boot allows configuration to be externalized (e.g., `application.properties`, YAML, environment variables), enabling environment-agnostic deployments. Understanding the order of precedence is key.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-max text-sm text-left text-gray-600">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Precedence</th>
+                                        <th scope="col" class="px-6 py-3">Source Type</th>
+                                        <th scope="col" class="px-6 py-3">Example</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4 font-medium">1 (Highest)</td>
+                                        <td class="px-6 py-4">Command-Line Arguments</td>
+                                        <td class="px-6 py-4">`--server.port=9000`</td>
+                                    </tr>
+                                    <tr class="bg-gray-50 border-b">
+                                        <td class="px-6 py-4 font-medium">2</td>
+                                        <td class="px-6 py-4">Java System Properties</td>
+                                        <td class="px-6 py-4">`-Dserver.port=8080`</td>
+                                    </tr>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4 font-medium">3</td>
+                                        <td class="px-6 py-4">OS Environment Variables</td>
+                                        <td class="px-6 py-4">`SERVER_PORT=8090`</td>
+                                    </tr>
+                                    <tr class="bg-gray-50 border-b">
+                                        <td class="px-6 py-4 font-medium">4</td>
+                                        <td class="px-6 py-4">Config Data (External JAR)</td>
+                                        <td class="px-6 py-4">`config/application.yml`</td>
+                                    </tr>
+                                    <tr class="bg-white">
+                                        <td class="px-6 py-4 font-medium">5</td>
+                                        <td class="px-6 py-4">Config Data (Packaged in JAR)</td>
+                                        <td class="px-6 py-4">`classpath:application.properties`</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                         <p class="text-sm text-gray-500 mt-2">A simplified view; Spring Boot supports many more sources.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rest-apis" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">III. Building Blocks: RESTful APIs & Data</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <div class="card-header">REST API Design Best Practices</div>
+                    <div class="card-content space-y-3">
+                        <p class="text-gray-700 mb-4">Well-designed REST APIs are crucial for inter-service communication. Consistency and adherence to standards enhance interoperability.</p>
+                        <ul class="list-none space-y-3">
+                            <li class="flex items-start"><span class="text-palette-accent1 text-xl mr-2">🏷️</span> <div><strong class="text-palette-primary">Nouns for Resources:</strong> Use plural nouns (e.g., `/users`).</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent1 text-xl mr-2">🛠️</span> <div><strong class="text-palette-primary">HTTP Methods for Actions:</strong> GET, POST, PUT, DELETE for operations.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent1 text-xl mr-2">📄</span> <div><strong class="text-palette-primary">JSON for Data Exchange:</strong> Standard for request/response bodies.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent1 text-xl mr-2">🚦</span> <div><strong class="text-palette-primary">Standard HTTP Status Codes:</strong> For clear error/success indication.</div></li>
+                            <li class="flex items-start"><span class="text-palette-accent1 text-xl mr-2">🔗</span> <div><strong class="text-palette-primary">Logical Nesting (Cautiously):</strong> For related resources (e.g., `/users/{id}/orders`).</div></li>
+                             <li class="flex items-start"><span class="text-palette-accent1 text-xl mr-2">🔢</span> <div><strong class="text-palette-primary">Versioning:</strong> For managing API evolution (e.g., `/v1/users`).</div></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">@Controller vs. @RestController</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Spring offers distinct annotations for web controllers based on response type.</p>
+                        <div class="mb-4 p-4 border-l-4 border-palette-secondary bg-purple-50 rounded">
+                            <h4 class="font-semibold text-palette-secondary">@Controller</h4>
+                            <p class="text-sm text-gray-600">Traditionally for Spring MVC, returns a view (e.g., HTML). Requires `@ResponseBody` to return data directly.</p>
+                        </div>
+                        <div class="p-4 border-l-4 border-palette-accent1 bg-red-50 rounded">
+                            <h4 class="font-semibold text-palette-accent1">@RestController</h4>
+                            <p class="text-sm text-gray-600">Combines `@Controller` and `@ResponseBody`. Ideal for REST APIs, automatically serializes return objects to the HTTP response body (typically JSON).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="data-access" class="mb-16">
+             <h2 class="text-3xl font-bold text-center mb-10 section-title">IV. Persisting Data: Spring Data JPA</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <div class="card-header">The E-R-S-C Pattern</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-6">The Entity-Repository-Service-Controller pattern promotes clear separation of concerns for maintainable applications.</p>
+                        <div class="space-y-4">
+                            <div class="flow-step p-4 rounded-lg shadow-md text-center"><strong>Controller</strong> <span class="block text-xs">(Handles HTTP Requests, API Exposure)</span></div>
+                            <div class="text-center"><span class="flow-arrow text-3xl">⬇️</span></div>
+                            <div class="flow-step p-4 rounded-lg shadow-md text-center"><strong>Service</strong> <span class="block text-xs">(Business Logic Orchestration)</span></div>
+                            <div class="text-center"><span class="flow-arrow text-3xl">⬇️</span></div>
+                            <div class="flow-step p-4 rounded-lg shadow-md text-center"><strong>Repository</strong> <span class="block text-xs">(Data Access Operations, extends JpaRepository)</span></div>
+                            <div class="text-center"><span class="flow-arrow text-3xl">⬇️</span></div>
+                            <div class="flow-step p-4 rounded-lg shadow-md text-center"><strong>Entity</strong> <span class="block text-xs">(Maps to Database Table, Data Structure)</span></div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card">
+                    <div class="card-header">Database Integration (Illustrative Usage)</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Spring Boot simplifies integration with various databases. The "database-per-service" model is common.</p>
+                        <div class="chart-container h-72 max-h-80"><canvas id="databaseUsageChart"></canvas></div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">Illustrative distribution of database types commonly used with Spring Boot.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="communication-discovery" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">V. Connecting the Dots: Communication & Discovery</h2>
+            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="card lg:col-span-1">
+                    <div class="card-header">Communication Patterns</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Services communicate synchronously or asynchronously.</p>
+                        <div class="mb-3 p-3 border rounded border-palette-secondary">
+                            <h4 class="font-semibold text-palette-secondary">Synchronous (e.g., REST, gRPC)</h4>
+                            <p class="text-xs text-gray-600">Caller waits for immediate response. Simpler for direct needs, but creates tight coupling.</p>
+                        </div>
+                        <div class="p-3 border rounded border-palette-accent1">
+                            <h4 class="font-semibold text-palette-accent1">Asynchronous (e.g., Kafka, RabbitMQ)</h4>
+                            <p class="text-xs text-gray-600">Sender doesn't wait. Reduces coupling, improves resilience and responsiveness.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card lg:col-span-2">
+                    <div class="card-header">Service Discovery: Eureka vs. Consul (Illustrative Comparison)</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Dynamic service discovery is crucial for locating services in volatile environments.</p>
+                        <div class="chart-container h-72 max-h-80"><canvas id="serviceDiscoveryChart"></canvas></div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">Illustrative feature comparison. Kubernetes also offers native service discovery.</p>
+                    </div>
+                </div>
+                <div class="card lg:col-span-3">
+                    <div class="card-header">API Gateway: The Central Orchestrator</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-6 text-center">An API Gateway acts as a single entry point, centralizing cross-cutting concerns.</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+                            <div class="p-3 flow-step rounded-md shadow"><span class="text-xl">🔐</span><br>Authentication & Authorization</div>
+                            <div class="p-3 flow-step rounded-md shadow"><span class="text-xl">🚦</span><br>Request Routing</div>
+                            <div class="p-3 flow-step rounded-md shadow"><span class="text-xl">⚖️</span><br>Load Balancing</div>
+                            <div class="p-3 flow-step rounded-md shadow"><span class="text-xl">🧱</span><br>Response Composition</div>
+                            <div class="p-3 flow-step rounded-md shadow"><span class="text-xl">⏱️</span><br>Rate Limiting</div>
+                            <div class="p-3 flow-step rounded-md shadow"><span class="text-xl">🛡️</span><br>Security Protection</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resilience" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">VI. Ensuring Robustness: Resilience & Self-Healing</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <div class="card-header">Circuit Breaker Pattern (e.g., Resilience4j)</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-6">Prevents cascading failures by stopping requests to failing services.</p>
+                        <div class="space-y-3 text-center">
+                            <div class="p-3 border-2 border-green-500 rounded-lg bg-green-50">
+                                <strong class="text-green-700">CLOSED:</strong> Requests flow normally.
+                                <div class="text-xs text-green-600">If failure rate threshold breached ➡️ OPEN</div>
+                            </div>
+                            <div class="flow-arrow text-2xl text-gray-500">⬇️</div>
+                            <div class="p-3 border-2 border-red-500 rounded-lg bg-red-50">
+                                <strong class="text-red-700">OPEN:</strong> Requests blocked, fallback returned.
+                                <div class="text-xs text-red-600">After wait duration ➡️ HALF-OPEN</div>
+                            </div>
+                            <div class="flow-arrow text-2xl text-gray-500">⬇️</div>
+                            <div class="p-3 border-2 border-yellow-500 rounded-lg bg-yellow-50">
+                                <strong class="text-yellow-700">HALF-OPEN:</strong> Limited test requests allowed.
+                                <div class="text-xs text-yellow-600">Success ➡️ CLOSED | Failure ➡️ OPEN</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Kubernetes Self-Healing</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Kubernetes offers inherent capabilities to maintain application availability and stability.</p>
+                        <ul class="list-none space-y-3">
+                            <li class="flex items-center"><span class="text-palette-accent2 text-xl mr-2">🔄</span> <span class="text-gray-700"><strong>Automatic Restarts:</strong> Failed containers/pods are automatically restarted.</span></li>
+                            <li class="flex items-center"><span class="text-palette-accent2 text-xl mr-2">⚖️</span> <span class="text-gray-700"><strong>Auto Scaling (HPA):</strong> Adjusts pod count based on demand.</span></li>
+                            <li class="flex items-center"><span class="text-palette-accent2 text-xl mr-2">🚦</span> <span class="text-gray-700"><strong>Load Balancing:</strong> Distributes traffic across instances.</span></li>
+                            <li class="flex items-center"><span class="text-palette-accent2 text-xl mr-2">🚀</span> <span class="text-gray-700"><strong>Rolling Updates:</strong> Zero-downtime deployments for new versions.</span></li>
+                            <li class="flex items-center"><span class="text-palette-accent2 text-xl mr-2">🩺</span> <span class="text-gray-700"><strong>Health Probes:</strong> Liveness & Readiness checks ensure traffic only goes to healthy pods.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cicd" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">VII. Streamlining Delivery: CI/CD Pipelines</h2>
+            <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+                 <div class="card">
+                    <div class="card-header">Dockerizing Spring Boot: Best Practices</div>
+                    <div class="card-content space-y-2">
+                        <p class="text-gray-700 mb-3">Containerization with Docker is key for consistent environments.</p>
+                        <ul class="list-disc list-inside text-gray-700 text-sm space-y-1">
+                            <li><strong>Multi-Stage Builds:</strong> Smaller, more secure production images.</li>
+                            <li><strong>Lightweight Base Images:</strong> (e.g., Alpine OpenJDK) for reduced size.</li>
+                            <li><strong>Explicit Tagging:</strong> Avoid `latest`; use versioned tags.</li>
+                            <li><strong>Non-Root User:</strong> Run containers with least privilege.</li>
+                            <li><strong>HEALTHCHECK Instruction:</strong> For robust container health monitoring.</li>
+                            <li><strong>Optimized JVM Options:</strong> For container resource management.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">The Microservices Testing Pyramid (Adapted)</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">A multi-layered testing strategy is essential for microservice reliability. This adapted pyramid emphasizes contract tests.</p>
+                        <div class="relative w-full h-64 flex flex-col items-center justify-end">
+                            <div class="w-full bg-red-200 text-red-700 py-1 text-center text-xs" style="clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%); height: 15%;">End-to-End Tests</div>
+                            <div class="w-10/12 bg-orange-200 text-orange-700 py-2 text-center text-sm" style="clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); height: 20%;">Contract Tests (Pact)</div>
+                            <div class="w-8/12 bg-yellow-200 text-yellow-700 py-3 text-center" style="clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%); height: 25%;">Integration Tests (Testcontainers)</div>
+                            <div class="w-6/12 bg-green-200 text-green-700 py-4 text-center text-lg font-semibold" style="clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%); height: 40%;">Unit Tests (JUnit, Mockito)</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 text-center">Focus on more numerous, faster tests at the base.</p>
+                    </div>
+                </div>
+                <div class="card lg:col-span-2">
+                    <div class="card-header">Popular CI/CD Tools for Microservices</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Automating build, test, and deployment is critical. Various tools offer robust CI/CD capabilities.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-max text-sm text-left text-gray-600">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-2">Tool</th>
+                                        <th scope="col" class="px-4 py-2">Key Strengths</th>
+                                        <th scope="col" class="px-4 py-2">Configuration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-4 py-2 font-medium">Jenkins</td>
+                                        <td class="px-4 py-2">Highly extensible, large plugin ecosystem, open-source.</td>
+                                        <td class="px-4 py-2">`Jenkinsfile` (Groovy)</td>
+                                    </tr>
+                                    <tr class="bg-gray-50 border-b">
+                                        <td class="px-4 py-2 font-medium">GitLab CI</td>
+                                        <td class="px-4 py-2">Integrated with GitLab SCM, built-in registry & K8s integration.</td>
+                                        <td class="px-4 py-2">`.gitlab-ci.yml`</td>
+                                    </tr>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-4 py-2 font-medium">GitHub Actions</td>
+                                        <td class="px-4 py-2">Integrated with GitHub, large marketplace, easy setup.</td>
+                                        <td class="px-4 py-2">YAML workflows in `.github/workflows`</td>
+                                    </tr>
+                                    <tr class="bg-gray-50">
+                                        <td class="px-4 py-2 font-medium">Azure DevOps</td>
+                                        <td class="px-4 py-2">Comprehensive suite, strong Azure integration, monorepo support.</td>
+                                        <td class="px-4 py-2">`azure-pipelines.yml`</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="cloud-deployment" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">VIII. Reaching the Cloud: Deployment Strategies</h2>
+            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="card">
+                    <div class="card-header">Cloud Deployment Models</div>
+                    <div class="card-content space-y-3">
+                        <div class="p-3 border rounded border-palette-primary bg-blue-50">
+                            <h4 class="font-semibold text-palette-primary">IaaS (Infrastructure)</h4>
+                            <p class="text-xs text-gray-600">Max control (VMs, OS); high operational effort. E.g., EC2, Azure VMs.</p>
+                        </div>
+                        <div class="p-3 border rounded border-palette-secondary bg-purple-50">
+                            <h4 class="font-semibold text-palette-secondary">PaaS (Platform)</h4>
+                            <p class="text-xs text-gray-600">Focus on code; platform manages infra. E.g., Elastic Beanstalk, Azure Spring Apps.</p>
+                        </div>
+                        <div class="p-3 border rounded border-palette-accent1 bg-red-50">
+                            <h4 class="font-semibold text-palette-accent1">Serverless (FaaS)</h4>
+                            <p class="text-xs text-gray-600">Event-driven, auto-scales (to zero); provider manages all. E.g., Lambda, Cloud Run.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Key Kubernetes Deployment Objects</div>
+                    <div class="card-content space-y-3 text-center">
+                         <p class="text-gray-700 mb-3">Kubernetes orchestrates containerized applications using declarative YAML manifests.</p>
+                        <div class="flow-step p-3 rounded-md shadow-sm"><strong>Deployment</strong><br><span class="text-xs">(Manages Pod Replicas & Updates)</span></div>
+                        <div class="flow-arrow text-2xl">⬇️</div>
+                        <div class="flow-step p-3 rounded-md shadow-sm"><strong>Service</strong><br><span class="text-xs">(Exposes Pods, Load Balancing)</span></div>
+                        <div class="flow-arrow text-2xl">⬇️</div>
+                        <div class="flow-step p-3 rounded-md shadow-sm"><strong>Ingress</strong><br><span class="text-xs">(Manages External Access, Routing)</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Platform Spotlights for Spring Boot</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-3">Major clouds offer tailored services:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li><strong>AWS:</strong> EKS (Kubernetes), Elastic Beanstalk (PaaS), ECS Fargate (Serverless Containers), Lambda (FaaS).</li>
+                            <li><strong>Azure:</strong> AKS (Kubernetes), Azure Spring Apps (PaaS), Azure Container Apps, Azure Functions (FaaS).</li>
+                            <li><strong>GCP:</strong> GKE (Kubernetes), Cloud Run (Serverless Containers), Cloud Functions (FaaS).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">IX. Keeping a Watchful Eye: Monitoring & Observability</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card">
+                    <div class="card-header">Spring Boot Actuator: Key Endpoints</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-3">Actuator exposes operational data for monitoring and management.</p>
+                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li>`/actuator/health`: Application health status.</li>
+                            <li>`/actuator/info`: Arbitrary application info.</li>
+                            <li>`/actuator/metrics`: Detailed application metrics.</li>
+                            <li>`/actuator/prometheus`: Prometheus-formatted metrics.</li>
+                            <li>`/actuator/loggers`: View and modify log levels.</li>
+                            <li>`/actuator/httptrace`: Recent HTTP request-response traces.</li>
+                            <li>`/actuator/env`: Environment properties (secure carefully!).</li>
+                        </ul>
+                         <p class="text-xs text-red-500 mt-2">Always secure sensitive Actuator endpoints in production!</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Metrics Stack: Micrometer, Prometheus, Grafana</div>
+                     <div class="card-content text-center">
+                        <p class="text-gray-700 mb-4">A common stack for comprehensive metrics collection and visualization.</p>
+                        <div class="flow-step p-3 rounded-md shadow-sm">Spring Boot App <br/> (+ Actuator & Micrometer)</div>
+                        <div class="flow-arrow text-2xl">➡️</div>
+                        <div class="flow-step p-3 rounded-md shadow-sm">Prometheus <br/> (Scrapes & Stores Metrics)</div>
+                        <div class="flow-arrow text-2xl">➡️</div>
+                        <div class="flow-step p-3 rounded-md shadow-sm">Grafana <br/> (Visualizes Metrics, Dashboards)</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Distributed Tracing: Jaeger vs. Zipkin (Illustrative)</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Trace requests across multiple services to diagnose issues. Spring Cloud Sleuth (now Micrometer Tracing) facilitates this.</p>
+                        <div class="chart-container h-64 max-h-72"><canvas id="tracingToolsChart"></canvas></div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">Illustrative comparison of popular tracing tools.</p>
+                    </div>
+                </div>
+                <div class="card md:col-span-2 lg:col-span-3">
+                    <div class="card-header">Centralized Logging Solutions</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Aggregate logs from all microservices for unified analysis.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-4 border rounded border-palette-secondary">
+                                <h4 class="font-semibold text-palette-secondary mb-1">ELK Stack (Elasticsearch, Logstash, Kibana)</h4>
+                                <p class="text-xs text-gray-600">Popular open-source suite for log aggregation, storage, search, and visualization.</p>
+                            </div>
+                             <div class="p-4 border rounded border-palette-accent1">
+                                <h4 class="font-semibold text-palette-accent1 mb-1">Cloud-Native Logging Services</h4>
+                                <p class="text-xs text-gray-600">Managed services like AWS CloudWatch Logs, Azure Monitor Logs, Google Cloud Logging offer scalability and deep cloud integration.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="security" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">X. Fortifying the System: Security Best Practices</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card">
+                    <div class="card-header">Authentication & Authorization with Spring Security</div>
+                    <div class="card-content">
+                        <p class="text-gray-700 mb-4">Spring Security is the standard. OAuth2 and JWT are common for API security.</p>
+                        <div class="text-center space-y-2">
+                            <div class="flow-step p-2 rounded text-sm">Client Request</div>
+                            <div class="flow-arrow text-lg">⬇️</div>
+                            <div class="flow-step p-2 rounded text-sm">API Gateway (Validates JWT/OAuth2 Token)</div>
+                            <div class="flow-arrow text-lg">⬇️</div>
+                             <div class="flow-step p-2 rounded text-sm">Secure Microservice (Receives authenticated request)</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">API Gateway centralizes security checks.</p>
+                    </div>
+                </div>
+                 <div class="card">
+                    <div class="card-header">Data Security Essentials</div>
+                    <div class="card-content space-y-2">
+                         <p class="text-gray-700 mb-3">Protecting sensitive data is crucial.</p>
+                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li><strong>HTTPS/TLS Everywhere:</strong> Encrypt data in transit. Consider mTLS for inter-service comms.</li>
+                            <li><strong>Secure Key/Secret Storage:</strong> Use Vaults (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault) or K8s Secrets. No hardcoding!</li>
+                            <li><strong>Encryption at Rest:</strong> Protect data in databases and storage.</li>
+                            <li><strong>Parameterized Queries:</strong> Prevent SQL injection (JPA helps).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Vulnerability Management</div>
+                    <div class="card-content space-y-2">
+                        <p class="text-gray-700 mb-3">Continuously manage vulnerabilities.</p>
+                         <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li><strong>OWASP Dependency-Check:</strong> Scan dependencies for known vulnerabilities.</li>
+                            <li><strong>Actuator Endpoint Security:</strong> Secure sensitive Actuator endpoints (e.g., `/env`, `/heapdump`).</li>
+                            <li><strong>Container Image Scanning:</strong> Regularly scan Docker images.</li>
+                            <li><strong>Regular Updates:</strong> Keep OS, JVM, libraries, and base images patched.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="mb-8">
+            <h2 class="text-3xl font-bold text-center mb-10 section-title">XI. The Road Ahead: Conclusion & Future Outlook</h2>
+            <div class="card">
+                <div class="card-content">
+                    <p class="text-gray-700 leading-relaxed mb-4">Spring Boot microservices offer a powerful paradigm for building scalable, resilient, and agile applications. The journey involves mastering development practices, inter-service communication, resilience patterns, CI/CD automation, strategic cloud deployment, robust observability, and continuous security.</p>
+                    <p class="text-gray-700 leading-relaxed">The future points towards increased automation, AI-driven operations and observability, and even more sophisticated, seamlessly integrated security. As Spring and cloud platforms evolve, developers will be further empowered to focus on delivering business value through distributed systems.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-palette-primary text-white text-center py-8 mt-12">
+        <p class="text-sm opacity-80">&copy; 2024 Spring Boot Microservices Insights. Infographic based on "Comprehensive Guide to Spring Boot Microservices".</p>
+    </footer>
+
+    <script>
+        // Function to convert backticks to bold text
+        function convertBackticksToBold(text) {
+            // Replace double backticks first
+            text = text.replace(/``(.*?)``/g, '<strong>$1</strong>');
+            // Replace single backticks
+            text = text.replace(/`([^`]+)`/g, '<strong>$1</strong>');
+            return text;
+        }
+
+        // Process all text nodes in the document
+        function processTextNodes(node) {
+            if (node.nodeType === 3) { // Text node
+                const newText = convertBackticksToBold(node.textContent);
+                if (newText !== node.textContent) {
+                    const span = document.createElement('span');
+                    span.innerHTML = newText;
+                    node.parentNode.replaceChild(span, node);
+                }
+            } else if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                // Skip script and style tags but process all other nodes
+                Array.from(node.childNodes).forEach(processTextNodes);
+            }
+        }
+
+        // Run the conversion when the document is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            processTextNodes(document.body);
+        });
+
+        // Chart configuration
+        const CHART_COLORS = {
+            primary: '#7A5195', // Purple
+            secondary: '#EF5675', // Pink/Red
+            tertiary: '#FFA600', // Orange
+            quaternary: '#BC5090', // Magenta
+            quinary: '#FF764A', // Coral
+            font: '#003F5C' // Dark Blue for text
+        };
+
+        Chart.defaults.font.family = 'Inter, sans-serif';
+        Chart.defaults.color = CHART_COLORS.font;
+        Chart.defaults.borderColor = 'rgba(0, 63, 92, 0.1)';
+
+
+        function processLabels(labels) {
+            return labels.map(label => {
+                if (typeof label === 'string' && label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    for (const word of words) {
+                        if ((currentLine + word).length > 16 && currentLine.length > 0) {
+                            lines.push(currentLine.trim());
+                            currentLine = '';
+                        }
+                        currentLine += word + ' ';
+                    }
+                    if (currentLine) lines.push(currentLine.trim());
+                    return lines;
+                }
+                return label;
+            });
+        }
+        
+        const commonTooltipTitleCallback = function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+              return label.join(' ');
+            } else {
+              return label;
+            }
+        };
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        boxWidth: 12,
+                        font: { size: 11 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: commonTooltipTitleCallback
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 4
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10 } }
+                },
+                y: {
+                    grid: { color: 'rgba(0, 63, 92, 0.05)' },
+                    ticks: { font: { size: 10 } },
+                    beginAtZero: true
+                }
+            }
+        };
+
+
+        // Build Tools Chart (Donut)
+        const buildToolsCtx = document.getElementById('buildToolsChart').getContext('2d');
+        const buildToolsChart = new Chart(buildToolsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: processLabels(['Maven', 'Gradle']),
+                datasets: [{
+                    label: 'Build Tool Usage',
+                    data: [65, 35], // Illustrative
+                    backgroundColor: [CHART_COLORS.primary, CHART_COLORS.secondary],
+                    borderColor: ['#FFFFFF', '#FFFFFF'],
+                    borderWidth: 2
+                }]
+            },
+            options: { ...commonChartOptions, cutout: '60%' }
+        });
+
+        // Starters Chart (Bar)
+        const startersCtx = document.getElementById('startersChart').getContext('2d');
+        const startersChart = new Chart(startersCtx, {
+            type: 'bar',
+            data: {
+                labels: processLabels(['Spring Web', 'Spring Data JPA', 'Spring Security', 'Spring Actuator']),
+                datasets: [{
+                    label: 'Popularity (Illustrative)',
+                    data: [90, 75, 70, 80], // Illustrative
+                    backgroundColor: CHART_COLORS.tertiary,
+                    borderColor: CHART_COLORS.tertiary,
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: { ...commonChartOptions, plugins: {...commonChartOptions.plugins, legend: {display: false} } }
+        });
+        
+        // Database Usage Chart (Pie)
+        const databaseUsageCtx = document.getElementById('databaseUsageChart').getContext('2d');
+        const databaseUsageChart = new Chart(databaseUsageCtx, {
+            type: 'pie',
+            data: {
+                labels: processLabels(['PostgreSQL', 'MySQL', 'MongoDB', 'Oracle', 'Other RDBMS']),
+                datasets: [{
+                    label: 'Database Usage (Illustrative)',
+                    data: [35, 30, 15, 10, 10], // Illustrative
+                    backgroundColor: [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary, CHART_COLORS.quaternary, CHART_COLORS.quinary],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2
+                }]
+            },
+            options: commonChartOptions
+        });
+
+        // Service Discovery Chart (Grouped Bar)
+        const serviceDiscoveryCtx = document.getElementById('serviceDiscoveryChart').getContext('2d');
+        const serviceDiscoveryChart = new Chart(serviceDiscoveryCtx, {
+            type: 'bar',
+            data: {
+                labels: processLabels(['Config Management', 'Health Checks', 'Consistency Model (CP)']),
+                datasets: [
+                    {
+                        label: 'Netflix Eureka',
+                        data: [0, 7, 0], // Illustrative: No, Basic (7/10), No (AP)
+                        backgroundColor: CHART_COLORS.primary,
+                        borderColor: CHART_COLORS.primary,
+                        borderWidth: 1,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'HashiCorp Consul',
+                        data: [10, 9, 10], // Illustrative: Yes, Robust (9/10), Yes
+                        backgroundColor: CHART_COLORS.secondary,
+                        borderColor: CHART_COLORS.secondary,
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }
+                ]
+            },
+             options: { ...commonChartOptions, scales: {...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: 10, ticks: {...commonChartOptions.scales.y.ticks, stepSize: 2}}} }
+        });
+
+        // Tracing Tools Chart (Bar)
+        const tracingToolsCtx = document.getElementById('tracingToolsChart').getContext('2d');
+        const tracingToolsChart = new Chart(tracingToolsCtx, {
+            type: 'bar',
+            data: {
+                labels: processLabels(['Ease of Setup', 'Scalability', 'Community Support', 'Feature Set']),
+                datasets: [
+                    {
+                        label: 'Jaeger',
+                        data: [7, 9, 8, 9], // Illustrative ratings
+                        backgroundColor: CHART_COLORS.tertiary,
+                        borderColor: CHART_COLORS.tertiary,
+                        borderWidth: 1,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Zipkin',
+                        data: [8, 7, 9, 7], // Illustrative ratings
+                        backgroundColor: CHART_COLORS.quaternary,
+                        borderColor: CHART_COLORS.quaternary,
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: { ...commonChartOptions, scales: {...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: 10, ticks: {...commonChartOptions.scales.y.ticks, stepSize: 2}}} }
+        });
+
+    </script>
+</body>
+</html>
