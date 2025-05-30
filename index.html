@@ -1,10 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO Meta Tags -->
+  <title>My Research Notes | Software Engineering</title>
+  <meta name="description" content="Public note from research on software engineering topics.">
+  <meta name="keywords" content="software engineering, research, notes, programming, development">
+  <link rel="canonical" href="https://github.com/Chhayhong/software-engineering" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:title" content="My Research Notes | Software Engineering" />
+  <meta property="og:description" content="Public note from research on software engineering topics." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://github.com/Chhayhong/software-engineering" />
+  <meta property="og:image" id="ogImage" content="https://scontent.fpnh10-1.fna.fbcdn.net/v/t39.30808-6/480529981_1229342422250367_2076398500051179976_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=n11lNnCIY_sQ7kNvwE8bsUX&_nc_oc=AdksCwB_wKHF62_kYIuK9NbY_wuja19rUV-_p4ivj3MTGvs4gJt6u7-i0ySNKa3W4RU&_nc_zt=23&_nc_ht=scontent.fpnh10-1.fna&_nc_gid=ysH6jq6hsfETodnLgh6Hcg&oh=00_AfJRuNfoOyFJWdSddFiOp6MBVDkWietzI_sGWSIsOYojcw&oe=683EEBA3" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="My Research Notes | Software Engineering" />
+  <meta name="twitter:description" content="Public note from research on software engineering topics." />
+  <meta name="twitter:image" id="twitterImage" content="https://scontent.fpnh10-1.fna.fbcdn.net/v/t39.30808-6/480529981_1229342422250367_2076398500051179976_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=n11lNnCIY_sQ7kNvwE8bsUX&_nc_oc=AdksCwB_wKHF62_kYIuK9NbY_wuja19rUV-_p4ivj3MTGvs4gJt6u7-i0ySNKa3W4RU&_nc_zt=23&_nc_ht=scontent.fpnh10-1.fna&_nc_gid=ysH6jq6hsfETodnLgh6Hcg&oh=00_AfJRuNfoOyFJWdSddFiOp6MBVDkWietzI_sGWSIsOYojcw&oe=683EEBA3" />
+
     <title>Learning Portal - Dive In!</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+    // List your images here
+    const images = [
+      "https://source.unsplash.com/random/800x600?software",
+      "https://source.unsplash.com/random/800x600?coding",
+      "https://source.unsplash.com/random/800x600?research",
+      "https://source.unsplash.com/random/800x600?development"
+      // Add more image URLs as needed
+    ];
+
+    function setRandomSocialImage() {
+      const randomImage = images[Math.floor(Math.random() * images.length)];
+      document.querySelector('meta[property="og:image"]').setAttribute('content', randomImage);
+      document.querySelector('meta[name="twitter:image"]').setAttribute('content', randomImage);
+    }
+
+    // Try to update the meta tags as soon as possible
+    setRandomSocialImage();
+  </script>
     <style>
         :root {
             --ocean-grad-start: #87CEEB; /* Sky Blue */
@@ -170,7 +209,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🌊 Dive Into Learning! 🐠</h1>
+        <h1>Welcome to My Software Engineering Research Notes</h1>
         <div class="subtitle">Explore the vast infographic knowledge. Choose your topic:</div>
 
         <div class="topic-list" id="topic-list">
