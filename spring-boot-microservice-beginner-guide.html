@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="scroll-behavior: smooth;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://raw.githubusercontent.com/Chhayhong/software-engineering/main/replace-backticks-to-bold.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -146,6 +147,23 @@
             <p class="text-xl md:text-2xl opacity-90">An Infographic Journey: From Development to Operational Excellence</p>
         </div>
     </header>
+
+    <nav class="sticky top-0 z-50 bg-white shadow-lg py-3 overflow-x-auto whitespace-nowrap">
+        <div class="container mx-auto px-4 flex justify-center space-x-4 sm:space-x-6 md:space-x-8">
+            <a href="https://chhayhong.github.io/software-engineering/" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Home</a>
+            <a href="#introduction" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Intro</a>
+            <a href="#developing" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Dev Setup</a>
+            <a href="#rest-apis" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">REST & Data</a>
+            <a href="#data-access" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Data Persist</a>
+            <a href="#communication-discovery" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Comm & Discovery</a>
+            <a href="#resilience" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Resilience</a>
+            <a href="#cicd" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">CI/CD</a>
+            <a href="#cloud-deployment" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Cloud Deploy</a>
+            <a href="#monitoring" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Monitoring</a>
+            <a href="#security" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Security</a>
+            <a href="#conclusion" class="text-palette-primary hover:text-palette-secondary font-medium text-sm md:text-base px-2 py-1 rounded-md">Conclusion</a>
+        </div>
+    </nav>
 
     <main class="container mx-auto p-4 md:p-8">
         
@@ -658,36 +676,6 @@
     </footer>
 
     <script>
-        // Function to convert backticks to bold text
-        function convertBackticksToBold(text) {
-            // Replace double backticks first
-            text = text.replace(/``(.*?)``/g, '<strong>$1</strong>');
-            // Replace single backticks
-            text = text.replace(/`([^`]+)`/g, '<strong>$1</strong>');
-            return text;
-        }
-
-        // Process all text nodes in the document
-        function processTextNodes(node) {
-            if (node.nodeType === 3) { // Text node
-                const newText = convertBackticksToBold(node.textContent);
-                if (newText !== node.textContent) {
-                    const span = document.createElement('span');
-                    span.innerHTML = newText;
-                    node.parentNode.replaceChild(span, node);
-                }
-            } else if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
-                // Skip script and style tags but process all other nodes
-                Array.from(node.childNodes).forEach(processTextNodes);
-            }
-        }
-
-        // Run the conversion when the document is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            processTextNodes(document.body);
-        });
-
-        // Chart configuration
         const CHART_COLORS = {
             primary: '#7A5195', // Purple
             secondary: '#EF5675', // Pink/Red
@@ -771,7 +759,7 @@
 
         // Build Tools Chart (Donut)
         const buildToolsCtx = document.getElementById('buildToolsChart').getContext('2d');
-        const buildToolsChart = new Chart(buildToolsCtx, {
+        new Chart(buildToolsCtx, {
             type: 'doughnut',
             data: {
                 labels: processLabels(['Maven', 'Gradle']),
@@ -788,7 +776,7 @@
 
         // Starters Chart (Bar)
         const startersCtx = document.getElementById('startersChart').getContext('2d');
-        const startersChart = new Chart(startersCtx, {
+        new Chart(startersCtx, {
             type: 'bar',
             data: {
                 labels: processLabels(['Spring Web', 'Spring Data JPA', 'Spring Security', 'Spring Actuator']),
@@ -806,7 +794,7 @@
         
         // Database Usage Chart (Pie)
         const databaseUsageCtx = document.getElementById('databaseUsageChart').getContext('2d');
-        const databaseUsageChart = new Chart(databaseUsageCtx, {
+        new Chart(databaseUsageCtx, {
             type: 'pie',
             data: {
                 labels: processLabels(['PostgreSQL', 'MySQL', 'MongoDB', 'Oracle', 'Other RDBMS']),
@@ -823,7 +811,7 @@
 
         // Service Discovery Chart (Grouped Bar)
         const serviceDiscoveryCtx = document.getElementById('serviceDiscoveryChart').getContext('2d');
-        const serviceDiscoveryChart = new Chart(serviceDiscoveryCtx, {
+        new Chart(serviceDiscoveryCtx, {
             type: 'bar',
             data: {
                 labels: processLabels(['Config Management', 'Health Checks', 'Consistency Model (CP)']),
@@ -851,7 +839,7 @@
 
         // Tracing Tools Chart (Bar)
         const tracingToolsCtx = document.getElementById('tracingToolsChart').getContext('2d');
-        const tracingToolsChart = new Chart(tracingToolsCtx, {
+        new Chart(tracingToolsCtx, {
             type: 'bar',
             data: {
                 labels: processLabels(['Ease of Setup', 'Scalability', 'Community Support', 'Feature Set']),
