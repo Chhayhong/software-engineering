@@ -263,7 +263,7 @@
                 a.innerHTML = `
                     <div>
                         <h2>${topic.title}</h2>
-                        <p>${topic.description}</p>
+                        <p>${topic.description.length > 150 ? topic.description.substring(0, topic.description.lastIndexOf(' ', 150)) + '...' : topic.description}</p>
                     </div>
                     <span class="explore">Explore &rarr;</span>`; // Changed "Start Exploring"
                 topicList.appendChild(a);
