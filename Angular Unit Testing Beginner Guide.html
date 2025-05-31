@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Angular Unit Testing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices:
+        - Report Info: Unit vs. E2E, Karma vs. Jest, Reactive vs. Template-Driven Forms. Goal: Compare. Viz/Method: Side-by-side cards and a dynamic Chart.js bar chart. Interaction: Hovering over chart bars reveals tooltips with detailed stats. Justification: Visual comparisons are faster to process than text tables. Library: Chart.js (Canvas).
+        - Report Info: Lifecycle Hooks, F.I.R.S.T. Principles. Goal: Organize. Viz/Method: Interactive accordion/collapsible sections. Interaction: Clicking a header expands to show detailed content. Justification: Hides complexity by default, allowing users to focus on one item at a time. Method: HTML/CSS/JS.
+        - Report Info: Async testing (`fakeAsync` vs `async`). Goal: Explain Process. Viz/Method: A custom interactive timeline simulation. Interaction: User clicks buttons like `tick()` to visually advance the timeline and see state changes. Justification: Makes abstract asynchronous concepts tangible and easier to grasp. Method: HTML/CSS/JS manipulation.
+        - Report Info: Code examples for various tests. Goal: Inform. Viz/Method: Tabbed content panes for TS Class, Spec File, and Explanation. Interaction: Clicking tabs switches the displayed code block. Justification: Organizes related code artifacts cleanly without cluttering the page. Method: HTML/CSS/JS.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #f59e0b; /* amber-500 */
+            color: #111827; /* gray-900 */
+            font-weight: 600;
+        }
+        .nav-link:not(.active):hover {
+            background-color: #374151; /* gray-700 */
+            color: #f3f4f6; /* gray-100 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-button.active {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            background-color: #1f2937;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .accordion-button.open + .accordion-content {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <aside class="w-64 bg-gray-800 text-gray-100 flex-shrink-0 overflow-y-auto">
+            <div class="p-5 border-b border-gray-700">
+                <h1 class="text-xl font-bold text-white">Angular Testing Guide</h1>
+                <p class="text-xs text-gray-400 mt-1">Interactive Edition</p>
+            </div>
+            <nav class="mt-4">
+                <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="introduction">
+                    <span class="text-amber-400 mr-2">◆</span> Introduction
+                </a>
+                <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="setup">
+                    <span class="text-amber-400 mr-2">◆</span> Environment Setup
+                </a>
+                <div>
+                    <h3 class="px-5 pt-4 pb-2 text-xs uppercase font-semibold text-gray-500">Core Constructs</h3>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="services">
+                        <span class="text-amber-400 mr-2">◆</span> Services
+                    </a>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="components">
+                        <span class="text-amber-400 mr-2">◆</span> Components
+                    </a>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="directives-pipes">
+                        <span class="text-amber-400 mr-2">◆</span> Directives & Pipes
+                    </a>
+                </div>
+                <div>
+                    <h3 class="px-5 pt-4 pb-2 text-xs uppercase font-semibold text-gray-500">Advanced Scenarios</h3>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="async">
+                        <span class="text-amber-400 mr-2">◆</span> Asynchronous Ops
+                    </a>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="forms">
+                        <span class="text-amber-400 mr-2">◆</span> Forms
+                    </a>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="routing-state">
+                        <span class="text-amber-400 mr-2">◆</span> Routing & State
+                    </a>
+                </div>
+                 <div>
+                    <h3 class="px-5 pt-4 pb-2 text-xs uppercase font-semibold text-gray-500">Optimization</h3>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="best-practices">
+                        <span class="text-amber-400 mr-2">◆</span> Best Practices
+                    </a>
+                    <a href="#" class="nav-link block p-3 mx-2 my-1 rounded-lg text-sm" data-section="performance">
+                        <span class="text-amber-400 mr-2">◆</span> Performance
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-900">
+
+            <section id="introduction" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Introduction to Angular Unit Testing</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">This section introduces the fundamental concepts of unit testing in Angular. We'll explore why testing is a critical investment for building reliable applications and differentiate between the two primary types of tests: unit tests and end-to-end (E2E) tests. Understanding their distinct roles is the first step toward a robust quality assurance strategy.</p>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-xl font-semibold text-amber-400 mb-3">Why Unit Test? The Benefits</h3>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">✔</span><div><strong>Early Issue Detection:</strong> Catch bugs during development, reducing costs.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">✔</span><div><strong>Fewer Regressions:</strong> Ensure new changes don't break existing functionality.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">✔</span><div><strong>Better Architecture:</strong> Promotes modular, maintainable, and loosely-coupled code.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">✔</span><div><strong>Confident Refactoring:</strong> Provides a safety net to improve code without fear.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">✔</span><div><strong>Executable Documentation:</strong> Tests demonstrate how code is intended to be used.</div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-xl font-semibold text-amber-400 mb-3">Unit vs. End-to-End (E2E) Tests</h3>
+                        <p class="text-sm text-gray-400 mb-4">Unit tests and E2E tests are complementary, not interchangeable. Both are necessary for comprehensive coverage.</p>
+                        <div>
+                            <h4 class="font-semibold text-white">Unit Tests</h4>
+                            <p class="text-xs text-gray-400 mt-1">Focus on individual, isolated parts (components, services). They are fast, precise, and developer-centric.</p>
+                        </div>
+                        <div class="my-4 border-t border-dashed border-gray-600"></div>
+                        <div>
+                            <h4 class="font-semibold text-white">E2E Tests</h4>
+                            <p class="text-xs text-gray-400 mt-1">Validate complete user workflows across the entire application. They are slower but provide holistic, user-centric validation.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 bg-gray-800 p-6 rounded-lg border border-gray-700">
+                     <h3 class="text-2xl font-bold text-white mb-4">Angular's Default Ecosystem: Jasmine & Karma</h3>
+                     <p class="text-gray-400 mb-6 max-w-3xl">By default, the Angular CLI sets up a testing environment using Jasmine as the testing framework and Karma as the test runner. This integrated setup allows you to start writing and running tests immediately.</p>
+                     <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-amber-400">Jasmine: The Framework</h4>
+                            <p class="text-sm text-gray-300 mt-2">A Behavior-Driven Development (BDD) framework that provides functions to structure tests and make assertions.</p>
+                            <ul class="mt-3 space-y-2 text-sm">
+                                <li><code class="bg-gray-700 px-2 py-1 rounded text-amber-300">describe()</code>: Groups related tests into a suite.</li>
+                                <li><code class="bg-gray-700 px-2 py-1 rounded text-amber-300">it()</code>: Defines an individual test case (a "spec").</li>
+                                <li><code class="bg-gray-700 px-2 py-1 rounded text-amber-300">expect()</code>: Makes an assertion about a value.</li>
+                                <li><code class="bg-gray-700 px-2 py-1 rounded text-amber-300">beforeEach()</code>: Runs setup code before each test.</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h4 class="text-lg font-semibold text-amber-400">Karma: The Runner</h4>
+                            <p class="text-sm text-gray-300 mt-2">A tool that executes the Jasmine tests in a real browser environment directly from your command line.</p>
+                             <ul class="mt-3 space-y-2 text-sm">
+                                 <li>Launches browsers (e.g., Chrome, Headless Chrome).</li>
+                                 <li>Watches files for changes and re-runs tests automatically.</li>
+                                 <li>Reports test results to the console and browser.</li>
+                                 <li>Note: Karma is now deprecated, with Jest being a popular alternative.</li>
+                             </ul>
+                        </div>
+                     </div>
+                </div>
+            </section>
+
+            <section id="setup" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Environment Setup & Core Patterns</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">This section covers the initial setup process, which is largely automated by the Angular CLI. We will examine the standard file structure and naming conventions that keep projects organized, and introduce the fundamental Arrange-Act-Assert (AAA) pattern, a crucial methodology for writing clear, maintainable, and easy-to-understand tests.</p>
+                
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-2xl font-bold text-white mb-4">The Arrange-Act-Assert (AAA) Pattern</h3>
+                    <p class="text-gray-400 mb-6">The AAA pattern provides a logical structure for your tests, making them readable and consistent. Each test should be divided into these three distinct phases.</p>
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-gray-900 p-4 rounded-lg">
+                            <div class="text-3xl text-amber-400 font-bold mb-2">1</div>
+                            <h4 class="font-semibold text-white">Arrange</h4>
+                            <p class="text-sm text-gray-400 mt-1">Set up the test. Create objects, mock dependencies, and define the initial state.</p>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-lg">
+                            <div class="text-3xl text-amber-400 font-bold mb-2">2</div>
+                            <h4 class="font-semibold text-white">Act</h4>
+                            <p class="text-sm text-gray-400 mt-1">Perform the action. Call the method or trigger the event you want to test.</p>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-lg">
+                            <div class="text-3xl text-amber-400 font-bold mb-2">3</div>
+                            <h4 class="font-semibold text-white">Assert</h4>
+                            <p class="text-sm text-gray-400 mt-1">Verify the outcome. Use `expect` to check if the result is what you anticipated.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
+                     <h3 class="text-2xl font-bold text-white mb-4">File Structure & Naming</h3>
+                     <p class="text-gray-400 mb-4">The Angular CLI enforces a consistent structure that improves project discoverability.</p>
+                     <ul class="space-y-3 text-gray-300">
+                         <li class="flex items-start">
+                             <span class="text-amber-400 mr-3 mt-1 text-lg">›</span>
+                             <div>
+                                 <strong>Co-location:</strong> Test files (`.spec.ts`) are placed in the same directory as the source files they test.
+                                 <div class="mt-2 text-xs p-3 bg-gray-900 rounded-md font-mono">
+                                     src/app/my-component/<br>
+                                     ├── my-component.component.ts<br>
+                                     └── <span class="text-amber-300">my-component.component.spec.ts</span>
+                                 </div>
+                             </div>
+                         </li>
+                         <li class="flex items-start">
+                            <span class="text-amber-400 mr-3 mt-1 text-lg">›</span>
+                             <div>
+                                 <strong>Naming Convention:</strong> Test files always end with the `.spec.ts` extension. This allows tooling to easily identify and run them.
+                             </div>
+                         </li>
+                     </ul>
+                </div>
+            </section>
+
+            <section id="services" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Testing Services</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Services are the backbone of many Angular applications, encapsulating business logic, data access, and other shared functionalities. This section demonstrates how to test services, from simple, dependency-free services to more complex ones that interact with other parts of the framework, like making HTTP requests.</p>
+                
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-xl font-semibold text-white mb-4">Services with Dependencies & Mocking</h3>
+                    <p class="text-gray-400 mb-6">When a service depends on others, we use Angular's `TestBed` to provide mock or "spy" versions of those dependencies. This isolates the service under test, ensuring our test is reliable and focused. Jasmine Spies are a powerful tool for this.</p>
+                    
+                    <div class="code-tabs-container">
+                        <div class="border-b border-gray-700 mb-4">
+                            <nav class="flex space-x-4" aria-label="Tabs">
+                                <button class="tab-button active py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="service-spec">master.service.spec.ts</button>
+                                <button class="tab-button py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="service-class">master.service.ts</button>
+                                <button class="tab-button py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="service-dep">value.service.ts</button>
+                            </nav>
+                        </div>
+                        <div class="tab-content active" id="service-spec">
+                            <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+// TestBed is used to configure a testing module
+import { TestBed } from '@angular/core/testing';
+import { MasterService } from './master.service';
+import { ValueService } from './value.service';
+
+describe('MasterService', () => {
+  let masterService: MasterService;
+  let valueServiceSpy: jasmine.SpyObj&lt;ValueService&gt;;
+
+  beforeEach(() => {
+    // Create a spy object with a 'getValue' method
+    const spy = jasmine.createSpyObj('ValueService', ['getValue']);
+
+    TestBed.configureTestingModule({
+      // Provide both the service under test and the mock dependency
+      providers: [
+        MasterService,
+        { provide: ValueService, useValue: spy }
+      ]
+    });
+    masterService = TestBed.inject(MasterService);
+    valueServiceSpy = TestBed.inject(ValueService) as jasmine.SpyObj&lt;ValueService&gt;;
+  });
+
+  it('should call getValue from ValueService', () => {
+    // Stub the spy to return a specific value
+    valueServiceSpy.getValue.and.returnValue('my-value');
+    
+    // Act: Call the method
+    const result = masterService.getValue();
+
+    // Assert: Check the result and that the spy was called
+    expect(result).toBe('my-value');
+    expect(valueServiceSpy.getValue).toHaveBeenCalled();
+  });
+});
+                            </code></pre>
+                        </div>
+                        <div class="tab-content" id="service-class">
+                            <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { Injectable } from '@angular/core';
+import { ValueService } from './value.service';
+
+@Injectable({ providedIn: 'root' })
+export class MasterService {
+  constructor(private valueService: ValueService) {}
+  getValue() { return this.valueService.getValue(); }
+}
+                            </code></pre>
+                        </div>
+                        <div class="tab-content" id="service-dep">
+                           <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class ValueService {
+  getValue() { return 'real-value'; }
+}
+                            </code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-xl font-semibold text-white mb-4">Testing HTTP Services</h3>
+                    <p class="text-gray-400 mb-6">To test services that make HTTP requests without actual network calls, Angular provides `HttpClientTestingModule` and `HttpTestingController`. This allows you to mock backend responses and assert that your service handles them correctly.</p>
+                    <div class="code-tabs-container">
+                        <div class="border-b border-gray-700 mb-4">
+                            <nav class="flex space-x-4" aria-label="Tabs">
+                                <button class="tab-button active py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="http-spec">data.service.spec.ts</button>
+                                <button class="tab-button py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="http-class">data.service.ts</button>
+                            </nav>
+                        </div>
+                         <div class="tab-content active" id="http-spec">
+                             <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { DataService } from './data.service';
+
+describe('DataService', () => {
+  let service: DataService;
+  let httpTestingController: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [DataService]
+    });
+    service = TestBed.inject(DataService);
+    httpTestingController = TestBed.inject(HttpTestingController);
+  });
+  
+  afterEach(() => {
+    // Verify that no unmatched requests are outstanding.
+    httpTestingController.verify();
+  });
+
+  it('should retrieve data from the API via GET', () => {
+    const testData = { name: 'Test Data' };
+    const testUrl = '/api/data';
+
+    service.getData().subscribe(data =>
+      expect(data).toEqual(testData)
+    );
+
+    // Expect that a single request has been made which matches the given URL
+    const req = httpTestingController.expectOne(testUrl);
+    expect(req.request.method).toEqual('GET');
+
+    // Respond with mock data, causing the Observable to resolve
+    req.flush(testData);
+  });
+});
+                             </code></pre>
+                         </div>
+                         <div class="tab-content" id="http-class">
+                             <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class DataService {
+  constructor(private http: HttpClient) {}
+
+  getData(): Observable&lt;any&gt; {
+    return this.http.get('/api/data');
+  }
+}
+                             </code></pre>
+                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="components" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Testing Components</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Components are the core visual and interactive building blocks of an Angular application. Testing them involves checking both their class logic and their interaction with the DOM. This section covers how to test component inputs and outputs, and how to manage lifecycle hooks during tests to ensure predictable behavior.</p>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-xl font-semibold text-white mb-4">Testing Inputs (`@Input`) and Outputs (`@Output`)</h3>
+                    <p class="text-gray-400 mb-6">Testing a component's public API (`@Input` and `@Output`) is crucial for ensuring it integrates correctly with other components. You can set input values directly and subscribe to output events to verify their emissions.</p>
+
+                     <div class="code-tabs-container">
+                        <div class="border-b border-gray-700 mb-4">
+                            <nav class="flex space-x-4" aria-label="Tabs">
+                                <button class="tab-button active py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="io-spec">banner.component.spec.ts</button>
+                                <button class="tab-button py-2 px-4 border-b-2 font-medium text-sm border-transparent" data-target="io-class">banner.component.ts</button>
+                            </nav>
+                        </div>
+                         <div class="tab-content active" id="io-spec">
+                             <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BannerComponent } from './banner.component';
+
+describe('BannerComponent', () => {
+  let component: BannerComponent;
+  let fixture: ComponentFixture&lt;BannerComponent&gt;;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ declarations: [BannerComponent] });
+    fixture = TestBed.createComponent(BannerComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('should display the title from @Input', () => {
+    component.title = 'Test Title';
+    // Must call detectChanges() to update the DOM with the new input value
+    fixture.detectChanges(); 
+    
+    const h1 = fixture.nativeElement.querySelector('h1');
+    expect(h1.textContent).toContain('Test Title');
+  });
+
+  it('should emit an event on button click', () => {
+    let emittedValue: string | undefined;
+    // Subscribe to the @Output EventEmitter
+    component.action.subscribe((value: string) => emittedValue = value);
+
+    // Simulate the click action
+    component.onButtonClick();
+
+    // Assert that the event was emitted with the correct value
+    expect(emittedValue).toBe('button-clicked');
+  });
+});
+                             </code></pre>
+                         </div>
+                         <div class="tab-content" id="io-class">
+                            <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+@Component({
+  selector: 'app-banner',
+  template: `
+    &lt;h1&gt;{{ title }}&lt;/h1&gt;
+    &lt;button (click)="onButtonClick()"&gt;Click Me&lt;/button&gt;
+  `
+})
+export class BannerComponent {
+  @Input() title = 'Default Title';
+  @Output() action = new EventEmitter&lt;string&gt;();
+
+  onButtonClick() {
+    this.action.emit('button-clicked');
+  }
+}
+                            </code></pre>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-xl font-semibold text-white mb-4">Handling Lifecycle Hooks</h3>
+                    <p class="text-gray-400 mb-6">Angular does not automatically call lifecycle hooks like `ngOnInit` in a test environment. You must call them manually to ensure initialization logic runs as expected. This gives you explicit control over the component's state during the test.</p>
+                     <div id="accordion-hooks" class="space-y-2">
+                        <div class="accordion-item bg-gray-900 rounded-lg">
+                            <button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">
+                                `ngOnInit()`
+                                <span class="transform transition-transform text-amber-400">▼</span>
+                            </button>
+                            <div class="accordion-content px-4 pb-4 text-sm text-gray-300">
+                                <strong>Purpose:</strong> Runs once after Angular initializes the component's inputs. Ideal for initial data loading or service subscriptions. <br>
+                                <strong>Testing Relevance:</strong> You must call `component.ngOnInit()` manually in your test to trigger this logic. This is one of the most common lifecycle hooks to test.
+                            </div>
+                        </div>
+                         <div class="accordion-item bg-gray-900 rounded-lg">
+                            <button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">
+                                `ngOnChanges()`
+                                <span class="transform transition-transform text-amber-400">▼</span>
+                            </button>
+                            <div class="accordion-content px-4 pb-4 text-sm text-gray-300">
+                                <strong>Purpose:</strong> Runs every time an input property changes. Receives a `SimpleChanges` object. <br>
+                                <strong>Testing Relevance:</strong> Often triggered automatically by `fixture.detectChanges()` after you change an input property, so a manual call is less common but can be used for fine-grained control.
+                            </div>
+                        </div>
+                         <div class="accordion-item bg-gray-900 rounded-lg">
+                            <button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">
+                                `ngOnDestroy()`
+                                <span class="transform transition-transform text-amber-400">▼</span>
+                            </button>
+                            <div class="accordion-content px-4 pb-4 text-sm text-gray-300">
+                                <strong>Purpose:</strong> Runs just before the component is destroyed. Used for cleanup, like unsubscribing from Observables to prevent memory leaks. <br>
+                                <strong>Testing Relevance:</strong> You can spy on the `ngOnDestroy` method to assert that cleanup logic is correctly called when the component fixture is destroyed.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="directives-pipes" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Testing Directives & Pipes</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Directives and Pipes are reusable pieces of logic that modify element behavior or transform data in templates. Testing them correctly ensures this reusable logic is robust. Pipes are often pure functions and simple to test, while directives require a test host component to verify their DOM manipulations.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-xl font-semibold text-amber-400 mb-3">Testing Pipes</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Pure pipes are simple functions. You can test them by creating a new instance and calling the `transform` method directly, without needing `TestBed`.</p>
+                        <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { ReversePipe } from './reverse.pipe';
+
+it('should transform "abc" to "cba"', () => {
+  const pipe = new ReversePipe();
+  expect(pipe.transform('abc')).toBe('cba');
+});
+                        </code></pre>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-xl font-semibold text-amber-400 mb-3">Testing Attribute Directives</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Directives that manipulate the DOM must be tested with a host component. This allows you to simulate events and assert changes to the element's style or properties.</p>
+                        <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+// In test file, inside a describe block:
+beforeEach(() => {
+  fixture = TestBed.configureTestingModule({
+    declarations: [ HighlightDirective, TestHostComponent ]
+  }).createComponent(TestHostComponent);
+
+  // Get the element with the directive
+  const de = fixture.debugElement.query(By.css('p'));
+});
+
+it('should highlight the element on mouseover', () => {
+  de.triggerEventHandler('mouseover', null);
+  fixture.detectChanges();
+  expect(de.nativeElement.style.backgroundColor).toBe('yellow');
+});
+                        </code></pre>
+                    </div>
+                </div>
+
+            </section>
+            
+            <section id="async" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Testing Asynchronous Operations</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Modern web applications are inherently asynchronous. Testing code that involves timers, Promises, or Observables requires special tools to prevent flaky tests. Angular provides two primary utilities, `fakeAsync` and `async`, to manage asynchronous code in a controlled, predictable way.</p>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-2xl font-semibold text-white mb-4">Interactive Demo: `fakeAsync` vs. `async`</h3>
+                    <p class="text-gray-400 mb-6">Explore the difference between the two main asynchronous testing strategies. Use the buttons to control the flow and observe how each utility manages time and asynchronous tasks.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-gray-900 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-amber-400">`fakeAsync` with `tick()`</h4>
+                            <p class="text-sm text-gray-400 mt-2 mb-4">Gives you precise, manual control over time. The test feels synchronous.</p>
+                            <div id="fakeAsync-timeline" class="relative w-full h-2 bg-gray-700 rounded-full mb-4">
+                                <div id="fakeAsync-progress" class="absolute h-2 bg-amber-500 rounded-full" style="width: 0%;"></div>
+                            </div>
+                            <div id="fakeAsync-status" class="text-center font-mono text-sm h-6">Status: Waiting</div>
+                            <div class="mt-4 flex justify-center space-x-2">
+                                <button id="run-fakeAsync" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Run Test</button>
+                                <button id="tick-fakeAsync" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm" disabled>tick(1000)</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-900 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-amber-400">`async` with `whenStable()`</h4>
+                            <p class="text-sm text-gray-400 mt-2 mb-4">Waits for all pending asynchronous tasks to complete naturally.</p>
+                             <div class="flex justify-center items-center h-20 mb-4">
+                                <div id="async-spinner" class="w-10 h-10 border-4 border-dashed border-gray-600 rounded-full" style="display: none;"></div>
+                                <div id="async-status" class="font-mono text-sm">Status: Waiting</div>
+                            </div>
+                            <div class="mt-4 flex justify-center">
+                                <button id="run-async" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Run Test</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="forms" class="content-section">
+                 <h2 class="text-3xl font-bold text-white mb-4">Testing Forms</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Forms are central to user interaction. Angular provides two approaches: Reactive Forms and Template-Driven Forms. Their differing architectures lead to different testing strategies. Reactive forms are generally easier to unit test due to their programmatic and explicit nature.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-xl font-semibold text-amber-400 mb-3">Testing Reactive Forms</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Because the form model (`FormGroup`, `FormControl`) is created in the component's TypeScript class, you can test validation and state changes directly, with less reliance on DOM interaction.</p>
+                        <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+// In component class
+this.form = new FormGroup({
+  name: new FormControl('', Validators.required),
+});
+
+// In spec file
+it('should make the name control required', () => {
+  let control = component.form.get('name');
+  
+  control.setValue(''); // Set value programmatically
+  
+  expect(control.valid).toBeFalsy();
+  expect(control.errors['required']).toBeTruthy();
+});
+                        </code></pre>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-xl font-semibold text-amber-400 mb-3">Testing Template-Driven Forms</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Testing is more reliant on the DOM. You must simulate user input on the HTML elements and then trigger change detection to update the component's model.</p>
+                        <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+// In spec file
+it('should update the model on input', async () => {
+  await fixture.whenStable(); // Wait for form to initialize
+  fixture.detectChanges();
+
+  const nameInput = fixture.nativeElement.querySelector('#name');
+  nameInput.value = 'John Doe';
+  nameInput.dispatchEvent(new Event('input')); // Simulate input
+  
+  fixture.detectChanges();
+
+  expect(component.model.name).toBe('John Doe');
+});
+                        </code></pre>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="routing-state" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Testing Routing & State (NgRx)</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">For larger applications, managing navigation and application state becomes critical. This section explores how to test routing logic using `RouterTestingModule` to prevent actual URL changes, and how to test the core constructs of NgRx (Reducers, Effects, Selectors) for predictable state management.</p>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-lg font-semibold text-amber-400 mb-3">Testing NgRx Reducers</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Reducers are pure functions, making them the easiest part of NgRx to test. Simply call the reducer with a state and an action, and assert the new state.</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-lg font-semibold text-amber-400 mb-3">Testing NgRx Effects</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Effects handle side effects. Test them by providing a mock stream of actions (`provideMockActions`) and mocking dependent services to check if the correct follow-up actions are dispatched.</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                        <h3 class="text-lg font-semibold text-amber-400 mb-3">Testing NgRx Selectors</h3>
+                        <p class="text-gray-400 mb-4 text-sm">Selectors derive data from the store. Use `provideMockStore` and `overrideSelector` to give a component a specific slice of state, testing how it renders without setting up the whole store.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-xl font-semibold text-white mb-4">Testing Router Navigation</h3>
+                    <p class="text-gray-400 mb-6">Use `RouterTestingModule` to test navigation logic. This module provides spy implementations that let you assert navigation paths without changing the browser's URL. Remember routing is asynchronous, so use `fakeAsync` and `tick()`.</p>
+                    <pre><code class="language-typescript text-xs block bg-gray-900 p-4 rounded-md overflow-x-auto">
+import { RouterTestingModule } from '@angular/router/testing';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
+
+// In beforeEach():
+TestBed.configureTestingModule({
+  imports: [RouterTestingModule.withRoutes(routes)]
+});
+router = TestBed.inject(Router);
+location = TestBed.inject(Location);
+
+// In a test spec:
+it('should navigate to /home', fakeAsync(() => {
+  router.navigate(['/home']);
+  tick(); // Let the navigation complete
+  expect(location.path()).toBe('/home');
+}));
+                    </code></pre>
+                </div>
+            </section>
+            
+            <section id="best-practices" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Best Practices for Testing</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Writing tests is one thing; writing *good* tests is another. This section introduces the F.I.R.S.T. principles, a set of guidelines for creating a high-quality test suite that is fast, reliable, and easy to maintain. Following these principles ensures your tests are a long-term asset, not a liability.</p>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-2xl font-semibold text-white mb-4">The F.I.R.S.T. Principles</h3>
+                    <div id="accordion-first" class="space-y-2">
+                        <div class="accordion-item bg-gray-900 rounded-lg"><button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">Fast<span class="transform transition-transform text-amber-400">▼</span></button><div class="accordion-content px-4 pb-4 text-sm text-gray-300">Tests must run quickly. Slow tests discourage developers from running them frequently, defeating the purpose of rapid feedback. Aim for milliseconds per test.</div></div>
+                        <div class="accordion-item bg-gray-900 rounded-lg"><button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">Isolated / Independent<span class="transform transition-transform text-amber-400">▼</span></button><div class="accordion-content px-4 pb-4 text-sm text-gray-300">Tests should not depend on each other or on any shared state. The order in which they run should not matter. Each test should set up its own data and clean up after itself.</div></div>
+                        <div class="accordion-item bg-gray-900 rounded-lg"><button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">Repeatable<span class="transform transition-transform text-amber-400">▼</span></button><div class="accordion-content px-4 pb-4 text-sm text-gray-300">A test must produce the same result every time it is run, regardless of the environment. Avoid dependencies on external factors like network, date/time, or random numbers.</div></div>
+                        <div class="accordion-item bg-gray-900 rounded-lg"><button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">Self-Validating<span class="transform transition-transform text-amber-400">▼</span></button><div class="accordion-content px-4 pb-4 text-sm text-gray-300">The test should automatically determine if it passed or failed. It should not require manual inspection of log files or console output. The result should be a clear "pass" or "fail".</div></div>
+                        <div class="accordion-item bg-gray-900 rounded-lg"><button class="accordion-button w-full text-left p-4 font-semibold flex justify-between items-center">Thorough<span class="transform transition-transform text-amber-400">▼</span></button><div class="accordion-content px-4 pb-4 text-sm text-gray-300">Tests should cover all relevant scenarios, not just the "happy path." Test edge cases, error conditions, and boundary values. The goal is confidence, not just a high coverage percentage.</div></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="performance" class="content-section">
+                <h2 class="text-3xl font-bold text-white mb-4">Test Performance: Karma vs. Jest</h2>
+                <p class="text-gray-400 mb-8 max-w-3xl">Test execution speed is crucial for developer productivity. While Karma has been Angular's default test runner, Jest has gained immense popularity due to its superior performance. This section visually compares the two, highlighting why many teams are migrating to Jest.</p>
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-xl font-semibold text-white mb-4">Performance & Feature Comparison</h3>
+                    <p class="text-gray-400 mb-6">This chart illustrates the general performance differences. Jest's speed comes from its parallel execution and its use of a simulated DOM (JSDOM) instead of launching a full browser, which significantly reduces overhead. Note: Karma was officially deprecated in April 2023.</p>
+                    <div class="chart-container">
+                        <canvas id="perfChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+         // Function to convert backticks to bold text
+        function convertBackticksToBold(text) {
+            // Replace double backticks first
+            text = text.replace(/``(.*?)``/g, '<strong>$1</strong>');
+            // Replace single backticks
+            text = text.replace(/`([^`]+)`/g, '<strong>$1</strong>');
+            return text;
+        }
+
+        // Process all text nodes in the document
+        function processTextNodes(node) {
+            if (node.nodeType === 3) { // Text node
+                const newText = convertBackticksToBold(node.textContent);
+                if (newText !== node.textContent) {
+                    const span = document.createElement('span');
+                    span.innerHTML = newText;
+                    node.parentNode.replaceChild(span, node);
+                }
+            } else if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                // Skip script and style tags but process all other nodes
+                Array.from(node.childNodes).forEach(processTextNodes);
+            }
+        }
+
+        // Run the conversion when the document is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            processTextNodes(document.body);
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function showSection(sectionId) {
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                const activeSection = document.getElementById(sectionId);
+                const activeLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+                
+                if (activeSection) {
+                    activeSection.classList.add('active');
+                }
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = e.currentTarget.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+
+            showSection('introduction');
+
+            // Tab functionality
+            const tabContainers = document.querySelectorAll('.code-tabs-container');
+            tabContainers.forEach(container => {
+                const tabButtons = container.querySelectorAll('.tab-button');
+                const tabContents = container.querySelectorAll('.tab-content');
+                
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const targetId = e.currentTarget.getAttribute('data-target');
+                        
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        
+                        tabContents.forEach(content => {
+                            content.classList.remove('active');
+                            if(content.id === targetId) {
+                                content.classList.add('active');
+                            }
+                        });
+                    });
+                });
+            });
+
+            // Accordion functionality
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    button.classList.toggle('open');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+
+            // Async Demo Logic
+            const runFakeAsyncBtn = document.getElementById('run-fakeAsync');
+            const tickFakeAsyncBtn = document.getElementById('tick-fakeAsync');
+            const fakeAsyncProgress = document.getElementById('fakeAsync-progress');
+            const fakeAsyncStatus = document.getElementById('fakeAsync-status');
+
+            runFakeAsyncBtn.addEventListener('click', () => {
+                fakeAsyncStatus.textContent = 'setTimeout(1000) scheduled...';
+                fakeAsyncProgress.style.width = '0%';
+                runFakeAsyncBtn.disabled = true;
+                tickFakeAsyncBtn.disabled = false;
+            });
+
+            tickFakeAsyncBtn.addEventListener('click', () => {
+                fakeAsyncProgress.style.transition = 'width 1s linear';
+                fakeAsyncProgress.style.width = '100%';
+                fakeAsyncStatus.textContent = 'tick() advances time...';
+                setTimeout(() => {
+                    fakeAsyncStatus.textContent = 'Callback executed. Test complete.';
+                    runFakeAsyncBtn.disabled = false;
+                    tickFakeAsyncBtn.disabled = true;
+                }, 1000);
+            });
+            
+            const runAsyncBtn = document.getElementById('run-async');
+            const asyncSpinner = document.getElementById('async-spinner');
+            const asyncStatus = document.getElementById('async-status');
+
+            runAsyncBtn.addEventListener('click', () => {
+                asyncStatus.textContent = 'Waiting for stability...';
+                asyncSpinner.style.display = 'block';
+                runAsyncBtn.disabled = true;
+
+                // Simulate waiting for an async operation
+                setTimeout(() => {
+                    asyncStatus.textContent = 'whenStable() resolved. Complete.';
+                    asyncSpinner.style.display = 'none';
+                     runAsyncBtn.disabled = false;
+                }, 2000);
+            });
+            
+            // Chart.js Performance Chart
+            const ctx = document.getElementById('perfChart').getContext('2d');
+            const perfChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Test Execution Speed', 'Setup Simplicity', 'Parallel Execution', 'Community Support'],
+                    datasets: [{
+                        label: 'Jest',
+                        data: [9, 8, 10, 9],
+                        backgroundColor: 'rgba(245, 158, 11, 0.7)', // amber-500
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Karma (deprecated)',
+                        data: [4, 6, 3, 5],
+                        backgroundColor: 'rgba(75, 85, 99, 0.7)', // gray-600
+                        borderColor: 'rgba(75, 85, 99, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#d1d5db' }
+                        },
+                        y: {
+                           grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                           ticks: { color: '#d1d5db', font: { size: 14 } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#d1d5db'
+                            }
+                        },
+                        tooltip: {
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.raw;
+                                    return label + '/10';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
