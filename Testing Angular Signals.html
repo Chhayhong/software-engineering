@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide: Unit Testing Angular Signals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices: 
+        - Report Info: Basic Signal APIs (signal, computed, effect). Goal: Inform & Demonstrate. Viz: Interactive HTML cards with buttons and live-updating values (JS-driven). Justification: Provides immediate, tangible feedback on how signals work. Library: Vanilla JS.
+        - Report Info: Testing object relationships (TestBed, Fixture). Goal: Organize & Explain. Viz: Diagram built with Tailwind CSS grid/flexbox. Interaction: Clickable nodes reveal text. Justification: Visually clarifies abstract relationships. Library: Vanilla JS.
+        - Report Info: Specific testing scenarios (e.g., testing effects, inputs). Goal: Compare & Guide. Viz: Horizontal bar chart (Chart.js) visualizing test steps. Interaction: Clicking a bar highlights corresponding code. Justification: Connects the conceptual steps of a test to the actual implementation, reinforcing the process. Library: Chart.js.
+        - Report Info: Best practices and pitfalls. Goal: Inform & Organize. Viz: Two-column layout with flip-card-style elements. Interaction: Click to reveal details. Justification: Creates an engaging, gamified way to review key rules. Library: Vanilla JS.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .tab-active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            border-color: #0ea5e9; /* sky-500 */
+        }
+        .tab-inactive {
+            background-color: white;
+            color: #475569; /* slate-600 */
+            border-color: #e2e8f0; /* slate-200 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .code-block {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .highlight {
+            background-color: rgba(56, 189, 248, 0.3);
+            transition: background-color 0.3s;
+            display: block;
+            margin: -2px -12px;
+            padding: 2px 12px;
+            border-radius: 4px;
+        }
+        .flip-card { perspective: 1000px; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem; border-radius: 0.5rem; }
+        .flip-card-back { transform: rotateY(180deg); }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">Testing Angular Signals</h1>
+            <p class="mt-2 text-lg text-slate-600 max-w-3xl mx-auto">An interactive guide to mastering unit testing for Angular's new reactive primitives.</p>
+        </header>
+
+        <nav class="mb-8 flex flex-wrap justify-center gap-2">
+            <a href="https://chhayhong.github.io/software-engineering/index.html" data-tab="home" class="tab-btn px-4 py-2 rounded-md font-semibold border transition-all duration-200">Home</a>
+            <button data-tab="core" class="tab-btn px-4 py-2 rounded-md font-semibold border transition-all duration-200 tab-active">Core Concepts</button>
+            <button data-tab="fundamentals" class="tab-btn px-4 py-2 rounded-md font-semibold border transition-all duration-200 tab-inactive">Testing Fundamentals</button>
+            <button data-tab="strategies" class="tab-btn px-4 py-2 rounded-md font-semibold border transition-all duration-200 tab-inactive">Interactive Strategies</button>
+            <button data-tab="practices" class="tab-btn px-4 py-2 rounded-md font-semibold border transition-all duration-200 tab-inactive">Best Practices</button>
+        </nav>
+
+        <main>
+            <section id="core" class="content-section active">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800">Signal Primitives</h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto">Signals are the building blocks of reactivity. Interact with the demos below to see how `signal`, `computed`, and `effect` work together.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-2">Writable Signal</h3>
+                        <p class="text-slate-600 mb-4">The foundation. A `signal()` holds a value that you can explicitly update.</p>
+                        <div class="text-center bg-slate-100 p-4 rounded-lg mb-4">
+                            <p class="text-slate-500 text-sm">Counter Value</p>
+                            <p id="signalValue" class="text-4xl font-bold text-slate-800">0</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="setSignal" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded transition-colors">Set to 5</button>
+                            <button id="updateSignal" class="flex-1 bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded transition-colors">Increment</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-2">Computed Signal</h3>
+                        <p class="text-slate-600 mb-4">A read-only signal that derives its value from other signals and updates automatically.</p>
+                        <div class="text-center bg-slate-100 p-4 rounded-lg mb-4">
+                            <p class="text-slate-500 text-sm">Counter Doubled</p>
+                            <p id="computedValue" class="text-4xl font-bold text-slate-800">0</p>
+                        </div>
+                        <p class="text-center text-sm text-slate-500">This value updates when the Writable Signal on the left changes.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-2">Effect</h3>
+                        <p class="text-slate-600 mb-4">Runs side effects (like logging) in response to signal changes.</p>
+                        <div class="bg-slate-800 text-white font-mono text-xs p-4 rounded-lg h-32 overflow-y-auto">
+                            <p class="text-green-400">> Console Log:</p>
+                            <div id="effectLog"></div>
+                        </div>
+                         <p class="text-center mt-4 text-sm text-slate-500">The log updates when the Writable Signal changes.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="fundamentals" class="content-section">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800">Anatomy of an Angular Test</h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto">Understanding the core utilities is key. Click the components of the diagram below to learn about their roles in setting up an isolated test environment.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-center font-semibold">
+                        <div class="md:col-span-2 p-4 bg-sky-100 text-sky-800 rounded-lg shadow-sm tooltip-container relative">
+                            <span class="cursor-pointer">TestBed.configureTestingModule()</span>
+                            <div class="tooltip-content hidden absolute bottom-full mb-2 w-64 bg-slate-800 text-white text-xs rounded py-2 px-3 z-10 text-left">
+                                Emulates an `@NgModule`. It configures a testing module with the necessary declarations, providers, and imports to isolate the unit under test.
+                            </div>
+                        </div>
+                        <div class="text-3xl text-slate-400">→</div>
+                        <div class="md:col-span-2 p-4 bg-sky-100 text-sky-800 rounded-lg shadow-sm tooltip-container relative">
+                            <span class="cursor-pointer">TestBed.createComponent()</span>
+                             <div class="tooltip-content hidden absolute bottom-full mb-2 w-64 bg-slate-800 text-white text-xs rounded py-2 px-3 z-10 text-left">
+                                Creates an instance of the component within the configured test environment and returns a `ComponentFixture`.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center my-4">
+                        <div class="text-3xl text-slate-400 transform -rotate-90 md:rotate-0">↓</div>
+                    </div>
+                     <div class="p-6 bg-slate-100 rounded-lg shadow-inner border">
+                        <div class="p-4 bg-emerald-100 text-emerald-800 rounded-lg shadow-sm text-center font-semibold tooltip-container relative">
+                           <span class="cursor-pointer">ComponentFixture</span>
+                           <div class="tooltip-content hidden absolute bottom-full mb-2 w-64 bg-slate-800 text-white text-xs rounded py-2 px-3 z-10 text-left">
+                                The "test harness" for the component. It provides access to the component instance and its DOM element for interaction and assertions.
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-center font-medium">
+                            <div class="p-3 bg-white rounded-lg shadow-sm tooltip-container relative">
+                                <span class="cursor-pointer">fixture.componentInstance</span>
+                                <div class="tooltip-content hidden absolute top-full mt-2 w-64 bg-slate-800 text-white text-xs rounded py-2 px-3 z-10 text-left">
+                                    Direct access to the component's TypeScript class instance. Used to call methods or check public properties.
+                                </div>
+                            </div>
+                            <div class="p-3 bg-white rounded-lg shadow-sm tooltip-container relative">
+                                <span class="cursor-pointer">fixture.debugElement</span>
+                                <div class="tooltip-content hidden absolute top-full mt-2 w-64 bg-slate-800 text-white text-xs rounded py-2 px-3 z-10 text-left">
+                                    An abstraction over the native DOM element. Used with `By.css()` to query for elements in the template for assertions or to trigger events.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="strategies" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800">Interactive Testing Strategies</h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto">Select a testing scenario to see the code, the test, and a breakdown of the key steps. Click on a bar in the chart to highlight the relevant code in the test.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200">
+                    <div class="mb-6">
+                        <label for="strategySelector" class="block text-sm font-medium text-slate-700 mb-1">Select Scenario:</label>
+                        <select id="strategySelector" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                            <option value="effect">Testing an `effect()`</option>
+                            <option value="input">Testing a Signal `input()`</option>
+                            <option value="toSignal">Testing `toSignal()` from RxJS</option>
+                            <option value="untracked">Testing with `untracked()`</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-slate-700 mb-2" id="strategyTitle"></h3>
+                        <p class="text-slate-600" id="strategyDescription"></p>
+                    </div>
+                    
+                    <div class="chart-container mb-8">
+                        <canvas id="strategyChart"></canvas>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-2 text-slate-800">Code Under Test</h4>
+                            <div id="codeUnderTest" class="code-block h-96"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-2 text-slate-800">The Unit Test</h4>
+                            <div id="codeTest" class="code-block h-96"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="practices" class="content-section">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800">Best Practices & Common Pitfalls</h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto">Solid testing habits lead to robust applications. Click on the cards to flip them for more details.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-emerald-600 text-center mb-4">Do 👍</h3>
+                        <div id="practices-do" class="space-y-4"></div>
+                    </div>
+                     <div>
+                        <h3 class="text-2xl font-bold text-rose-600 text-center mb-4">Don't 👎</h3>
+                        <div id="practices-dont" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+     // Function to convert backticks to bold text
+        function convertBackticksToBold(text) {
+            // Replace double backticks first
+            text = text.replace(/``(.*?)``/g, '<strong>$1</strong>');
+            // Replace single backticks
+            text = text.replace(/`([^`]+)`/g, '<strong>$1</strong>');
+            return text;
+        }
+
+        // Process all text nodes in the document
+        function processTextNodes(node) {
+            if (node.nodeType === 3) { // Text node
+                const newText = convertBackticksToBold(node.textContent);
+                if (newText !== node.textContent) {
+                    const span = document.createElement('span');
+                    span.innerHTML = newText;
+                    node.parentNode.replaceChild(span, node);
+                }
+            } else if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                // Skip script and style tags but process all other nodes
+                Array.from(node.childNodes).forEach(processTextNodes);
+            }
+        }
+
+        // Run the conversion when the document is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            processTextNodes(document.body);
+        });
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Data Store
+    const DATA = {
+        strategies: {
+            effect: {
+                title: 'Testing an `effect()`',
+                description: 'Effects run side effects and need to be created in an injection context. Tests must explicitly trigger and flush them to observe their behavior, especially for asynchronous actions.',
+                code: `
+// logger.service.ts
+@Injectable({ providedIn: 'root' })
+export class LoggerService {
+  messages: string[] = [];
+  log(message: string) {
+    this.messages.push(message);
+  }
+}
+
+// component-with-effect.ts
+@Component({...})
+export class MyComponent {
+  private logger = inject(LoggerService);
+  count = signal(0);
+
+  constructor() {
+    effect(() => {
+      this.logger.log(\`Count is: \${this.count()}\`);
+    });
+  }
+}`,
+                test: `
+it('should log messages when count signal changes', fakeAsync(() => {
+  // 1. SETUP: Configure TestBed with mocks
+  const mockLogger = { log: jasmine.createSpy('log') };
+  TestBed.configureTestingModule({
+    providers: [{ provide: LoggerService, useValue: mockLogger }],
+  });
+
+  // 2. CREATE: Create component within injection context
+  const fixture = TestBed.createComponent(MyComponent);
+  const component = fixture.componentInstance;
+  
+  // 3. FLUSH: Run initial effect
+  TestBed.flushEffects();
+  expect(mockLogger.log).toHaveBeenCalledWith('Count is: 0');
+  
+  // 4. TRIGGER: Change the signal value
+  component.count.set(5);
+  
+  // 5. FLUSH & ASSERT: Flush again and verify
+  TestBed.flushEffects();
+  expect(mockLogger.log).toHaveBeenCalledWith('Count is: 5');
+}));`,
+                chart: {
+                    labels: ['Setup Mocks', 'Create Component', 'Initial Flush', 'Trigger Change', 'Flush & Assert'],
+                    highlights: [
+                        [2, 3, 4, 5],
+                        [8, 9],
+                        [12, 13],
+                        [16],
+                        [19, 20]
+                    ]
+                }
+            },
+            input: {
+                title: 'Testing a Signal `input()`',
+                description: 'Avoid setting signal inputs directly. Use a "Wrapper Component" or `fixture.setInput()` to ensure Angular\'s property binding mechanism is correctly triggered.',
+                code: `
+// child.component.ts
+@Component({
+  selector: 'app-child',
+  template: '<p>Received: {{ message() }}</p>',
+  standalone: true,
+})
+export class ChildComponent {
+  message = input.required<string>();
+}`,
+                test: `
+// 1. SETUP: Create a "wrapper" host component for the test
+@Component({
+  template: \`<app-child [message]="testMessage"></app-child>\`,
+  standalone: true,
+  imports: [ChildComponent],
+})
+class TestHostComponent {
+  testMessage = 'Initial Message';
+}
+
+it('should display the initial input value', () => {
+  // 2. CREATE: Create the host component
+  const fixture = TestBed.createComponent(TestHostComponent);
+  
+  // 3. DETECT CHANGES: Trigger data binding
+  fixture.detectChanges();
+  
+  // 4. ASSERT: Check the rendered DOM
+  const p = fixture.nativeElement.querySelector('p');
+  expect(p.textContent).toBe('Received: Initial Message');
+  
+  // 5. TRIGGER & VERIFY: Update value and re-check
+  fixture.componentInstance.testMessage = 'Updated Message';
+  fixture.detectChanges();
+  expect(p.textContent).toBe('Received: Updated Message');
+});`,
+                 chart: {
+                    labels: ['Setup Host', 'Create Component', 'Detect Changes', 'Assert DOM', 'Update & Verify'],
+                    highlights: [
+                        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        [13],
+                        [16],
+                        [19, 20],
+                        [23, 24, 25]
+                    ]
+                }
+            },
+            toSignal: {
+                title: 'Testing `toSignal()` from RxJS',
+                description: 'When converting an Observable to a Signal, test the initial value, asynchronous emissions, and automatic unsubscription.',
+                code: `
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
+
+// data.service.ts
+@Injectable({ providedIn: 'root' })
+export class DataService {
+  private data$ = new Subject<string>();
+  
+  data = toSignal(this.data$.asObservable(), {
+    initialValue: 'Loading...',
+  });
+  
+  emitData(value: string) {
+    this.data$.next(value);
+  }
+}`,
+                test: `
+import { fakeAsync, tick } from '@angular/core/testing';
+
+it('should convert observable to signal correctly', fakeAsync(() => {
+  // 1. SETUP: Get the service instance
+  const service = TestBed.inject(DataService);
+  
+  // 2. ASSERT INITIAL: Verify the initialValue is used
+  expect(service.data()).toBe('Loading...');
+  
+  // 3. TRIGGER: Emit a value from the source observable
+  service.emitData('First Value');
+  
+  // 4. STABILIZE: Let microtasks finish
+  tick();
+  
+  // 5. ASSERT UPDATE: Check the signal's updated value
+  expect(service.data()).toBe('First Value');
+}));`,
+                chart: {
+                    labels: ['Setup', 'Assert Initial', 'Trigger Observable', 'Stabilize Time', 'Assert Update'],
+                    highlights: [
+                        [4],
+                        [7],
+                        [10],
+                        [13],
+                        [16]
+                    ]
+                }
+            },
+            untracked: {
+                title: 'Testing with `untracked()`',
+                description: 'To test `untracked()`, you must verify the absence of a dependency. Assert that changing the untracked signal does *not* re-run the computed/effect.',
+                code: `
+// report.service.ts
+@Injectable({ providedIn: 'root' })
+export class ReportService {
+  user = signal('Admin');
+  triggerCount = signal(0);
+  
+  reportLog = computed(() => {
+    // We only want this to re-compute when 'user' changes,
+    // not when 'triggerCount' changes.
+    const message = \`User: \${this.user()} triggered a report.\`;
+    const count = untracked(this.triggerCount);
+    return \`\${message} (Total triggers: \${count})\`;
+  });
+}`,
+                test: `
+it('should not re-compute when untracked signal changes', () => {
+  // 1. SETUP: Get service instance
+  const service = TestBed.inject(ReportService);
+  
+  // 2. ASSERT INITIAL: Check initial computed value
+  expect(service.reportLog()).toBe('User: Admin triggered a report. (Total triggers: 0)');
+  
+  // 3. TRIGGER UNTRACKED & ASSERT: Change untracked signal
+  service.triggerCount.set(5);
+  // The value should be stale because the computed did NOT re-run
+  expect(service.reportLog()).toBe('User: Admin triggered a report. (Total triggers: 0)');
+
+  // 4. TRIGGER TRACKED & ASSERT: Change tracked dependency
+  service.user.set('Editor');
+  // Now it re-runs, pulling the latest value from untracked signal
+  expect(service.reportLog()).toBe('User: Editor triggered a report. (Total triggers: 5)');
+});`,
+                chart: {
+                    labels: ['Setup', 'Assert Initial', 'Trigger Untracked', 'Assert Stale State', 'Trigger Tracked & Assert Final'],
+                    highlights: [
+                        [2],
+                        [5],
+                        [8],
+                        [10],
+                        [13, 15]
+                    ]
+                }
+            }
+        },
+        practices: {
+            "do": [
+                { title: 'Test Behavior, Not Implementation', detail: 'Focus on what the component does from a user\'s perspective. Use tools like Angular Testing Library to interact with the DOM instead of checking internal state.' },
+                { title: 'Mock Dependencies Effectively', detail: 'Isolate the unit under test by providing mock versions of its services or child components. This makes tests faster, more stable, and easier to debug.' },
+                { title: 'Use `fakeAsync` for Timers/Async', detail: 'When testing effects or signals updated via `setTimeout` or Promises, use `fakeAsync` and `tick()` to control the flow of time synchronously.' },
+                { title: 'Use Wrapper Components for Inputs', detail: 'To test signal `input()`s, create a host component in your test to bind to the input. This ensures you are testing through Angular\'s actual change detection mechanism.' },
+                { title: 'Keep Computed Signals Pure', detail: 'A `computed()` function should never have side effects. It should only derive a value. This makes them predictable and simple to test.' },
+            ],
+            "dont": [
+                { title: 'Forget to Flush Effects', detail: 'Effects don\'t run immediately after a signal changes. You must call `TestBed.flushEffects()` (or `fixture.detectChanges()`) to trigger them in a test.' },
+                { title: 'Directly Set Signal Inputs', detail: 'Avoid `component.myInput.set(...)`. This bypasses Angular\'s property binding and can lead to tests that pass but don\'t reflect real-world behavior.' },
+                { title: 'Over-rely on TestBed', detail: 'For simple services with no Angular dependencies, you can often test them faster by just instantiating them with `new` and manually providing mocks.' },
+                { title: 'Ignore Injection Context', detail: '`effect()`, `toSignal()`, and `toObservable()` often need an injection context. Use `TestBed.runInInjectionContext()` when testing them outside a component fixture.' },
+                { title: 'Test Private Methods', detail: 'Stick to testing the public API of a class. Testing private implementation details makes your tests brittle and hard to refactor.' },
+            ]
+        }
+    };
+    
+    // Core Concepts Demo
+    const signalValueEl = document.getElementById('signalValue');
+    const computedValueEl = document.getElementById('computedValue');
+    const effectLogEl = document.getElementById('effectLog');
+    
+    let counter = 0;
+    
+    const renderCoreConcepts = () => {
+        signalValueEl.textContent = counter;
+        computedValueEl.textContent = counter * 2;
+        const logEntry = document.createElement('p');
+        logEntry.textContent = `> Effect ran. New value: ${counter}`;
+        effectLogEl.appendChild(logEntry);
+        effectLogEl.scrollTop = effectLogEl.scrollHeight;
+    };
+    
+    document.getElementById('setSignal').addEventListener('click', () => {
+        counter = 5;
+        renderCoreConcepts();
+    });
+
+    document.getElementById('updateSignal').addEventListener('click', () => {
+        counter++;
+        renderCoreConcepts();
+    });
+
+    renderCoreConcepts();
+
+    // Tab Navigation
+    const tabs = document.querySelectorAll('.tab-btn');
+    const sections = document.querySelectorAll('.content-section');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+
+            tabs.forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('tab-inactive');
+            });
+            tab.classList.add('tab-active');
+            tab.classList.remove('tab-inactive');
+
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === target) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+    
+    // Testing Fundamentals Tooltips
+    const tooltipContainers = document.querySelectorAll('.tooltip-container');
+    tooltipContainers.forEach(container => {
+        const trigger = container.querySelector('span');
+        const content = container.querySelector('.tooltip-content');
+        trigger.addEventListener('click', () => {
+            content.classList.toggle('hidden');
+        });
+        container.addEventListener('mouseleave', () => {
+             content.classList.add('hidden');
+        });
+    });
+
+    // Best Practices
+    const doContainer = document.getElementById('practices-do');
+    const dontContainer = document.getElementById('practices-dont');
+
+    const createFlipCard = (item, type) => {
+        const card = document.createElement('div');
+        card.className = 'flip-card h-32 cursor-pointer';
+        
+        const cardInner = document.createElement('div');
+        cardInner.className = 'flip-card-inner';
+
+        const front = document.createElement('div');
+        const frontColor = type === 'do' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+        front.className = `flip-card-front ${frontColor} text-center`;
+        front.innerHTML = `<h4 class="text-lg font-semibold">${item.title}</h4>`;
+
+        const back = document.createElement('div');
+        back.className = 'flip-card-back bg-slate-700 text-slate-100 text-sm';
+        back.textContent = item.detail;
+
+        cardInner.appendChild(front);
+        cardInner.appendChild(back);
+        card.appendChild(cardInner);
+        
+        card.addEventListener('click', () => card.classList.toggle('flipped'));
+
+        return card;
+    };
+
+    DATA.practices.do.forEach(item => doContainer.appendChild(createFlipCard(item, 'do')));
+    DATA.practices.dont.forEach(item => dontContainer.appendChild(createFlipCard(item, 'dont')));
+
+
+    // Interactive Strategies
+    const strategySelector = document.getElementById('strategySelector');
+    const strategyTitle = document.getElementById('strategyTitle');
+    const strategyDescription = document.getElementById('strategyDescription');
+    const codeUnderTestEl = document.getElementById('codeUnderTest');
+    const codeTestEl = document.getElementById('codeTest');
+    const chartCanvas = document.getElementById('strategyChart');
+    let strategyChart = null;
+
+    const highlightCode = (lines) => {
+        const codeLines = codeTestEl.innerHTML.split('\\n');
+        const highlightedLines = codeLines.map((line, index) => {
+             return lines.includes(index + 1) ? `<span class="highlight">${line}</span>` : line;
+        });
+        codeTestEl.innerHTML = highlightedLines.join('\\n');
+    };
+    
+    const updateStrategyView = (strategyKey) => {
+        const strategy = DATA.strategies[strategyKey];
+        if (!strategy) return;
+        
+        strategyTitle.textContent = strategy.title;
+        strategyDescription.textContent = strategy.description;
+        codeUnderTestEl.textContent = strategy.code.trim();
+        codeTestEl.textContent = strategy.test.trim();
+
+        if (strategyChart) {
+            strategyChart.destroy();
+        }
+
+        strategyChart = new Chart(chartCanvas, {
+            type: 'bar',
+            data: {
+                labels: strategy.chart.labels,
+                datasets: [{
+                    label: 'Test Steps',
+                    data: Array(strategy.chart.labels.length).fill(10),
+                    backgroundColor: 'rgba(14, 165, 233, 0.6)', // sky-500
+                    borderColor: 'rgba(14, 165, 233, 1)',
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        ticks: {
+                            font: { size: 14, weight: '500' },
+                            color: '#334155' // slate-700
+                        },
+                        grid: { display: false }
+                    }
+                },
+                onClick: (evt) => {
+                    const points = strategyChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        const index = firstPoint.index;
+                        const linesToHighlight = strategy.chart.highlights[index];
+                        codeTestEl.textContent = strategy.test.trim(); // Reset highlights
+                        if(linesToHighlight) {
+                             highlightCode(linesToHighlight);
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    strategySelector.addEventListener('change', (e) => updateStrategyView(e.target.value));
+    updateStrategyView('effect'); // Initial load
+});
+</script>
+</body>
+</html>
