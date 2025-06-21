@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>គោលការណ៍ណែនាំពីព្រះសូត្រ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Amber/Stone) with a subtle Amber accent -->
+    <!-- Application Structure Plan: A thematic, single-page app with top navigation. Content is organized into three main interactive sections: 'Things to Avoid' (collapsible cards), 'Choosing Friends' (side-by-side comparison), and 'Honoring the 6 Directions' (an interactive central diagram with modals). This structure turns a linear text document into an exploratory experience, enhancing understanding and engagement with the ethical principles. -->
+    <!-- Visualization & Content Choices: 1. Lists of Vices/Causes/etc. -> Goal: Inform -> Presentation: Grouped interactive cards (HTML/Tailwind) -> Interaction: JS toggle on click -> Justification: Breaks down long lists. 2. Friend Types -> Goal: Compare -> Presentation: Side-by-side columns (HTML/Flexbox) -> Interaction: Static display for clear comparison -> Justification: Highlights contrast effectively. 3. 6 Directions -> Goal: Organize/Relate -> Presentation: CSS-based hub-and-spoke diagram -> Interaction: JS click to show modal with reciprocal duties -> Justification: Visually represents the core metaphor of social relationships, making complex information intuitive to navigate. NO CHARTS needed as data is qualitative. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .active-nav {
+            color: #f59e0b; 
+            font-weight: 600;
+        }
+        .content-card {
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .direction-node {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .direction-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-amber-600">សិង្គាលោវាទសូត្រ</h1>
+            <div class="hidden md:flex space-x-6 text-slate-600">
+                <a href="#avoid" class="hover:text-amber-500 transition-colors">អំពើគួរជៀសវាង</a>
+                <a href="#friends" class="hover:text-amber-500 transition-colors">ការជ្រើសរើសមិត្ត</a>
+                <a href="#directions" class="hover:text-amber-500 transition-colors">ការគោរពទិសទាំង៦</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white">
+            <a href="#avoid" class="block py-2 px-4 text-sm hover:bg-stone-100">អំពើគួរជៀសវាង</a>
+            <a href="#friends" class="block py-2 px-4 text-sm hover:bg-stone-100">ការជ្រើសរើសមិត្ត</a>
+            <a href="#directions" class="block py-2 px-4 text-sm hover:bg-stone-100">ការគោរពទិសទាំង៦</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center my-12 md:my-16">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">គោលការណ៍ណែនាំពីព្រះសូត្របិតាស៊ីងហាឡា</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto">គេហទំព័រអន្តរកម្មនេះនឹងនាំអ្នកទៅស្វែងយល់ពី "វិន័យសម្រាប់គ្រហស្ថ" ដែលជាមគ្គទេសក៍ដ៏មានតម្លៃសម្រាប់ការរស់នៅប្រកបដោយសីលធម៌ សេចក្ដីសុខ និងភាពចុះសម្រុងក្នុងសង្គម។</p>
+        </section>
+        
+        <section id="avoid" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-slate-900">អំពើដែលគួរជៀសវាង</h3>
+            <p class="text-md text-slate-600 text-center max-w-2xl mx-auto mb-10">ដើម្បីជាគ្រឹះនៃជីវិតដ៏ល្អ ព្រះពុទ្ធអង្គបានណែនាំឱ្យគ្រហស្ថជៀសវាងនូវអំពើអកុសល និងទម្លាប់ដែលនាំទៅរកសេចក្ដីវិនាស។ សូមចុចលើប្រធានបទនីមួយៗដើម្បីស្វែងយល់បន្ថែម។</p>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="content-card bg-white rounded-xl p-6">
+                    <button class="w-full text-left focus:outline-none" onclick="toggleContent('content1')">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xl font-semibold text-amber-700">កម្មកិលេស ៤យ៉ាង</h4>
+                            <span class="transform transition-transform" id="arrow1">▼</span>
+                        </div>
+                    </button>
+                    <div id="content1" class="hidden mt-4 space-y-2 text-slate-700">
+                        <p><strong>១. សម្លាប់សត្វ៖</strong> ការវៀរចាកការធ្វើបាបសត្វដោយចេតនា។</p>
+                        <p><strong>២. លួចទ្រព្យ៖</strong> ការមិនយកទ្រព្យសម្បត្តិដែលគេមិនបានឲ្យ។</p>
+                        <p><strong>៣. ប្រព្រឹត្តខុសក្នុងកាម៖</strong> ការប្រព្រឹត្តផ្លូវភេទមិនត្រឹមត្រូវ។</p>
+                        <p><strong>៤. និយាយកុហក៖</strong> ការនិយាយពាក្យមិនពិត។</p>
+                    </div>
+                </div>
+                <div class="content-card bg-white rounded-xl p-6">
+                    <button class="w-full text-left focus:outline-none" onclick="toggleContent('content2')">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xl font-semibold text-amber-700">អគតិ ៤យ៉ាង</h4>
+                            <span class="transform transition-transform" id="arrow2">▼</span>
+                        </div>
+                    </button>
+                    <div id="content2" class="hidden mt-4 space-y-2 text-slate-700">
+                        <p><strong>១. ឆន្ទាគតិ៖</strong> ការប្រព្រឹត្តទៅដោយលោភៈ។</p>
+                        <p><strong>២. ទោសាគតិ៖</strong> ការប្រព្រឹត្តទៅដោយសេចក្តីក្រោធ។</p>
+                        <p><strong>៣. មោហាគតិ៖</strong> ការប្រព្រឹត្តទៅដោយសេចក្តីភាន់ច្រឡំ។</p>
+                        <p><strong>៤. ភយាគតិ៖</strong> ការប្រព្រឹត្តទៅដោយការគំរាមកំហែង។</p>
+                    </div>
+                </div>
+                <div class="content-card bg-white rounded-xl p-6">
+                    <button class="w-full text-left focus:outline-none" onclick="toggleContent('content3')">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xl font-semibold text-amber-700">ផ្លូវវិនាសធនធាន ៦យ៉ាង</h4>
+                            <span class="transform transition-transform" id="arrow3">▼</span>
+                        </div>
+                    </button>
+                    <div id="content3" class="hidden mt-4 space-y-2 text-slate-700">
+                        <p>១. សេពគ្រឿងស្រវឹង</p>
+                        <p>២. ដើរលេងពេលយប់</p>
+                        <p>៣. សេពគប់ល្បែងកម្សាន្ត</p>
+                        <p>៤. លេងល្បែងស៊ីសង</p>
+                        <p>៥. សេពគប់មិត្តអាក្រក់</p>
+                        <p>៦. ទម្លាប់ខ្ជិលច្រអូស</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="friends" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-slate-900">ការជ្រើសរើសមិត្ត</h3>
+            <p class="text-md text-slate-600 text-center max-w-2xl mx-auto mb-10">ការសេពគប់មិត្តមានឥទ្ធិពលយ៉ាងខ្លាំងដល់ជីវិត។ ព្រះសូត្របានបង្ហាញយ៉ាងច្បាស់ពីលក្ខណៈនៃមិត្តល្អដែលគួររាប់អាន និងមិត្តក្លែងក្លាយដែលគួរសេពគប់។</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="content-card bg-white rounded-xl p-6 border-t-4 border-green-500">
+                    <h4 class="text-2xl font-bold text-green-700 mb-4">មិត្តល្អ ៤ប្រភេទ</h4>
+                    <ul class="space-y-3 list-disc list-inside text-slate-700">
+                        <li><strong>មិត្តជាអ្នកជួយឧបត្ថម្ភ៖</strong> ការពារអ្នក និងទ្រព្យសម្បត្តិរបស់អ្នក ជាទីពឹងពាក់ពេលមានអាសន្ន។</li>
+                        <li><strong>មិត្តក្នុងសុខទុក្ខ៖</strong> មិនបោះបង់អ្នកពេលមានគ្រោះថ្នាក់ សុខចិត្តលះបង់ជីវិតដើម្បីអ្នក។</li>
+                        <li><strong>មិត្តជាអ្នកផ្ដល់ដំបូន្មានល្អ៖</strong> រារាំងអ្នកពីអំពើអាក្រក់ ណែនាំអ្នកឱ្យធ្វើអំពើល្អ។</li>
+                        <li><strong>មិត្តមានចិត្តអាណិតអាសូរ៖</strong> ត្រេកអរពេលអ្នកបានសុខ មិនត្រេកអរពេលអ្នកមានទុក្ខ។</li>
+                    </ul>
+                </div>
+                <div class="content-card bg-white rounded-xl p-6 border-t-4 border-red-500">
+                    <h4 class="text-2xl font-bold text-red-700 mb-4">មិត្តក្លែងក្លាយ ៤ប្រភេទ</h4>
+                    <ul class="space-y-3 list-disc list-inside text-slate-700">
+                        <li><strong>មិត្តយកតែប្រយោជន៍៖</strong> យកអ្វីៗទាំងអស់ពីអ្នក ធ្វើសកម្មភាពដើម្បីតែប្រយោជន៍ខ្លួន។</li>
+                        <li><strong>មិត្តនិយាយតែពាក្យសម្ដី៖</strong> សន្យាទទេៗ មិនធ្វើតាមពាក្យសម្ដី។</li>
+                        <li><strong>មិត្តនិយាយសរសើរ៖</strong> យល់ស្របគ្រប់យ៉ាង ទោះបីជាអ្នកធ្វើខុសក៏ដោយ។</li>
+                        <li><strong>មិត្តបំផ្លាញ៖</strong> លើកទឹកចិត្តអ្នកឱ្យធ្វើសកម្មភាពដែលនាំទៅរកសេចក្ដីវិនាស។</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="directions" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2 text-slate-900">ការគោរពទិសទាំង៦</h3>
+            <p class="text-md text-slate-600 text-center max-w-2xl mx-auto mb-10">ការគោរពទិសទាំង៦ មិនមែនជាការបន់ស្រន់ទេ តែជាការបំពេញកាតព្វកិច្ចទៅវិញទៅមកក្នុងទំនាក់ទំនងសង្គម។ សូមចុចលើទិសនីមួយៗ ដើម្បីមើលពីកាតព្វកិច្ចដែលត្រូវបំពេញ។</p>
+
+            <div class="relative max-w-3xl mx-auto mt-16" style="padding-bottom: 100%;">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-32 h-32 md:w-40 md:h-40 bg-amber-500 text-white rounded-full flex flex-col items-center justify-center text-center shadow-lg">
+                        <span class="text-lg md:text-xl font-bold">គ្រហស្ថ</span>
+                        <span class="text-sm">(អ្នក)</span>
+                    </div>
+                </div>
+
+                <div id="dir-east" class="direction-node absolute cursor-pointer p-3 md:p-4 bg-white rounded-full shadow-md text-center" style="top: 50%; right: 0; transform: translateY(-50%);">
+                    <span class="text-sm md:text-base font-semibold">ទិសបូព៌ា</span>
+                    <div class="text-xs text-slate-500">មាតាបិតា</div>
+                </div>
+                <div id="dir-south" class="direction-node absolute cursor-pointer p-3 md:p-4 bg-white rounded-full shadow-md text-center" style="bottom: 0; left: 50%; transform: translateX(-50%);">
+                     <span class="text-sm md:text-base font-semibold">ទិសទក្សិណ</span>
+                    <div class="text-xs text-slate-500">គ្រូអាចារ្យ</div>
+                </div>
+                <div id="dir-west" class="direction-node absolute cursor-pointer p-3 md:p-4 bg-white rounded-full shadow-md text-center" style="top: 50%; left: 0; transform: translateY(-50%);">
+                     <span class="text-sm md:text-base font-semibold">ទិសបស្ចឹម</span>
+                    <div class="text-xs text-slate-500">ភរិយា/ស្វាមី</div>
+                </div>
+                 <div id="dir-north" class="direction-node absolute cursor-pointer p-3 md:p-4 bg-white rounded-full shadow-md text-center" style="top: 0; left: 50%; transform: translateX(-50%);">
+                     <span class="text-sm md:text-base font-semibold">ទិសឧត្ដរ</span>
+                    <div class="text-xs text-slate-500">មិត្តភ័ក្តិ</div>
+                </div>
+                <div id="dir-below" class="direction-node absolute cursor-pointer p-3 md:p-4 bg-white rounded-full shadow-md text-center" style="bottom: 20%; left: 20%; transform: translate(-50%, 50%);">
+                     <span class="text-sm md:text-base font-semibold">ទិសខាងក្រោម</span>
+                    <div class="text-xs text-slate-500">អ្នកបម្រើ/និយោជិត</div>
+                </div>
+                <div id="dir-above" class="direction-node absolute cursor-pointer p-3 md:p-4 bg-white rounded-full shadow-md text-center" style="top: 20%; right: 20%; transform: translate(50%, -50%);">
+                    <span class="text-sm md:text-base font-semibold">ទិសខាងលើ</span>
+                    <div class="text-xs text-slate-500">ព្រះសង្ឃ/អ្នកមានសីល</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-20">
+        <div class="container mx-auto p-6 text-center">
+            <p>&copy; 2025 គោលការណ៍ណែនាំពីព្រះសូត្របិតាស៊ីងហាឡា។ រចនាឡើងដើម្បីផ្សព្វផ្សាយការយល់ដឹង។</p>
+        </div>
+    </footer>
+    
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 id="modal-title" class="text-2xl font-bold text-amber-700"></h4>
+                    <button id="close-modal" class="text-2xl font-bold">&times;</button>
+                </div>
+                <div id="modal-content" class="grid md:grid-cols-2 gap-6">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(item => {
+            item.addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.add('hidden');
+            })
+        });
+
+        function toggleContent(id) {
+            const content = document.getElementById(id);
+            const arrow = document.getElementById(id.replace('content', 'arrow'));
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        
+        const directionData = {
+            'east': {
+                title: 'ទិសបូព៌ា៖ មាតាបិតា',
+                sideA: { title: 'កាតព្វកិច្ចកូនចំពោះមាតាបិតា', duties: ['ចិញ្ចឹមបីបាច់', 'ធ្វើកាតព្វកិច្ចជូន', 'រក្សាវង្សត្រកូល', 'ថែរក្សាមរតក', 'ឧទ្ទិសកុសលជូន'] },
+                sideB: { title: 'កាតព្វកិច្ចមាតាបិតាចំពោះកូន', duties: ['រារាំងកូនពីអំពើអាក្រក់', 'ណែនាំឱ្យធ្វើល្អ', 'បង្រៀនវិជ្ជាជីវៈ', 'រៀបចំអាពាហ៍ពិពាហ៍', 'ប្រគល់មរតកឱ្យ'] }
+            },
+            'south': {
+                title: 'ទិសទក្សិណ៖ គ្រូអាចារ្យ',
+                sideA: { title: 'កាតព្វកិច្ចសិស្សចំពោះគ្រូ', duties: ['បង្ហាញការគោរព', 'យកចិត្តទុកដាក់', 'ស្ដាប់ដោយយកចិត្តទុកដាក់', 'បម្រើគ្រូ', 'រៀនសូត្រដោយឧស្សាហ៍'] },
+                sideB: { title: 'កាតព្វកិច្ចគ្រូចំពោះសិស្ស', duties: ['បង្រៀនបានល្អ', 'ធ្វើឱ្យឆាប់យល់', 'បង្រៀនគ្រប់មុខវិជ្ជា', 'ការពារគ្រប់បែបយ៉ាង', 'ផ្ដល់សុវត្ថិភាព'] }
+            },
+            'west': {
+                title: 'ទិសបស្ចឹម៖ ភរិយា/ស្វាមី',
+                sideA: { title: 'កាតព្វកិច្ចស្វាមីចំពោះភរិយា', duties: ['បូជា និងគោរព', 'មិនមើលងាយ', 'ស្មោះត្រង់', 'ប្រគល់អំណាច', 'ផ្ដល់គ្រឿងអលង្ការ'] },
+                sideB: { title: 'កាតព្វកិច្ចភរិយាចំពោះស្វាមី', duties: ['រៀបចំផ្ទះសម្បែងបានល្អ', 'មានបដិសណ្ឋារកិច្ចល្អ', 'ស្មោះត្រង់', 'ការពារទ្រព្យសម្បត្តិ', 'មានជំនាញ និងឧស្សាហ៍'] }
+            },
+            'north': {
+                title: 'ទិសឧត្ដរ៖ មិត្តភ័ក្តិ',
+                sideA: { title: 'កាតព្វកិច្ចចំពោះមិត្ត', duties: ['សប្បុរស', 'និយាយដោយចិត្តល្អ', 'ប្រព្រឹត្តដោយសប្បុរសធម៌', 'ប្រព្រឹត្តដោយសមភាព', 'ស្មោះត្រង់នឹងពាក្យសម្ដី'] },
+                sideB: { title: 'កាតព្វកិច្ចមិត្តចំពោះអ្នក', duties: ['ការពារពេលធ្វេសប្រហែស', 'ការពារទ្រព្យសម្បត្តិ', 'ជាទីពឹងពាក់ពេលមានគ្រោះថ្នាក់', 'មិនបោះបង់ចោល', 'យកចិត្តទុកដាក់'] }
+            },
+            'below': {
+                title: 'ទិសខាងក្រោម៖ និយោជិត',
+                sideA: { title: 'កាតព្វកិច្ចនិយោជកចំពោះនិយោជិត', duties: ['បែងចែកការងារតាមសមត្ថភាព', 'ផ្ដល់អាហារ និងប្រាក់ខែ', 'ថែទាំពេលឈឺ', 'ចែករំលែកម្ហូបឆ្ងាញ់ៗ', 'ផ្ដល់ការឈប់សម្រាក និងអំណោយ'] },
+                sideB: { title: 'កាតព្វកិច្ចនិយោជិតចំពោះនិយោជក', duties: ['ក្រោកពីដំណេកមុន', 'ចូលគេងក្រោយ', 'យកតែអ្វីដែលគេបានឲ្យ', 'អនុវត្តភារកិច្ចបានល្អ', 'លើកតម្កើងចៅហ្វាយ'] }
+            },
+            'above': {
+                title: 'ទិសខាងលើ៖ ព្រះសង្ឃ',
+                sideA: { title: 'កាតព្វកិច្ចគ្រហស្ថចំពោះព្រះសង្ឃ', duties: ['បូជាដោយកាយចិត្តមេត្តា', 'រក្សាផ្ទះបើកចំហ', 'ផ្គត់ផ្គង់តម្រូវការ', ' ', ' '] },
+                sideB: { title: 'កាតព្វកិច្ចព្រះសង្ឃចំពោះគ្រហស្ថ', duties: ['រារាំងពីអំពើអាក្រក់', 'លើកទឹកចិត្តឱ្យធ្វើល្អ', 'បង្រៀនអ្វីដែលមិនធ្លាប់ឮ', 'ពន្យល់អ្វីដែលបានឮ', 'ចង្អុលបង្ហាញផ្លូវទៅកាន់សួគ៌'] }
+            }
+        };
+
+        function openModal(direction) {
+            const data = directionData[direction];
+            modalTitle.textContent = data.title;
+            
+            let contentHTML = `
+                <div>
+                    <h5 class="text-lg font-semibold text-slate-800 mb-2">${data.sideA.title}</h5>
+                    <ul class="space-y-1 list-disc list-inside text-slate-600">
+                        ${data.sideA.duties.map(duty => `<li>${duty}</li>`).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-lg font-semibold text-slate-800 mb-2">${data.sideB.title}</h5>
+                    <ul class="space-y-1 list-disc list-inside text-slate-600">
+                        ${data.sideB.duties.map(duty => `<li>${duty}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            modalContent.innerHTML = contentHTML;
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+        
+        document.getElementById('dir-east').addEventListener('click', () => openModal('east'));
+        document.getElementById('dir-south').addEventListener('click', () => openModal('south'));
+        document.getElementById('dir-west').addEventListener('click', () => openModal('west'));
+        document.getElementById('dir-north').addEventListener('click', () => openModal('north'));
+        document.getElementById('dir-below').addEventListener('click', () => openModal('below'));
+        document.getElementById('dir-above').addEventListener('click', () => openModal('above'));
+
+    </script>
+</body>
+</html>
