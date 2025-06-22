@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: PostgreSQL & NestJS Optimization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral -->
+    <!-- Application Structure Plan: A single-page application with a fixed left-hand sidebar for navigation and a dynamic main content area. This structure allows users to easily jump between complex topics without losing context. The architecture is thematic, grouping related concepts like 'Performance' or 'Concurrency' together, rather than following the linear flow of the source report. This is more intuitive for a technical audience looking for specific information. The user flow starts with a high-level overview and encourages non-linear exploration through the sidebar. Interactions are designed to make abstract concepts (like lock conflicts or pattern selection) tangible and actionable. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Stored Procedures vs. Functions. Goal: Compare. Viz/Method: Interactive side-by-side card layout. Interaction: Click to highlight. Justification: Encourages active learning over passive reading. Library: JS/HTML/CSS.
+        - Report Info: Isolation Levels & Locking. Goal: Compare abstract trade-offs. Viz/Method: Chart.js Radar and Bar charts. Interaction: Clicking a chart segment updates a detail pane. Justification: Visualizes complex relationships and connects high-level summaries with in-depth text. Library: Chart.js.
+        - Report Info: Data Sync Patterns. Goal: Guide user choice. Viz/Method: Interactive filter/wizard. Interaction: User selects project needs, app highlights the best pattern. Justification: Makes the report's knowledge directly applicable to the user's problems. Library: JS/HTML/CSS.
+        - Report Info: Best Practices. Goal: Organize dense info. Viz/Method: Accordion UI. Interaction: Click to expand/collapse. Justification: Prevents information overload and improves readability. Library: JS/HTML/CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #e0f2fe;
+            color: #0284c7;
+            border-left: 4px solid #0284c7;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-white border-r border-slate-200 fixed top-0 left-0 h-full z-10 hidden md:block">
+            <div class="p-4 border-b border-slate-200">
+                <h1 class="text-lg font-bold text-sky-700">PostgreSQL & NestJS</h1>
+                <p class="text-xs text-slate-500">Optimization Guide</p>
+            </div>
+            <nav id="sidebar-nav" class="flex flex-col p-2 space-y-1">
+                <a href="#overview" class="nav-link active px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">Overview</a>
+                <a href="#core-concepts" class="nav-link px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">Core Concepts</a>
+                <a href="#implementation" class="nav-link px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">NestJS Implementation</a>
+                <a href="#performance" class="nav-link px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">Performance Tuning</a>
+                <a href="#concurrency" class="nav-link px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">Concurrency & Deadlocks</a>
+                <a href="#sync-patterns" class="nav-link px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">Data Sync Patterns</a>
+                <a href="#recommendations" class="nav-link px-4 py-2.5 text-sm font-medium text-slate-700 rounded-md hover:bg-slate-100">Key Recommendations</a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Header -->
+        <header class="md:hidden fixed top-0 left-0 right-0 bg-white shadow-md z-20">
+            <div class="flex justify-between items-center p-4">
+                <h1 class="text-lg font-bold text-sky-700">PostgreSQL & NestJS</h1>
+                <button id="mobile-menu-button" class="p-2">
+                    <span class="block w-6 h-0.5 bg-slate-600"></span>
+                    <span class="block w-6 h-0.5 bg-slate-600 mt-1.5"></span>
+                    <span class="block w-6 h-0.5 bg-slate-600 mt-1.5"></span>
+                </button>
+            </div>
+            <nav id="mobile-menu" class="hidden flex-col p-2 space-y-1 bg-white border-t">
+                <!-- Mobile nav links will be injected by JS -->
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="ml-0 md:ml-64 p-4 md:p-8 w-full mt-16 md:mt-0">
+            
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">Executive Summary</h2>
+                <div class="space-y-4 text-slate-600 leading-relaxed card p-6">
+                   <p>This application provides an interactive guide to leveraging PostgreSQL stored procedures within a NestJS environment for high-performance, synchronized data applications. The goal is to distill the key findings of the source report into an easily digestible format. You'll find analysis on performance tuning, robust concurrency control, deadlock avoidance, and comparisons with alternative data synchronization patterns.</p>
+                   <p>Use the navigation on the left to explore different topics. Each section is designed to provide clear, actionable insights, transforming complex technical details into understandable concepts through interactive visualizations and structured content. This guide is intended for developers and architects aiming to build scalable and resilient systems.</p>
+                </div>
+            </section>
+
+            <!-- Core Concepts Section -->
+            <section id="core-concepts" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">Core Concepts</h2>
+                <div class="space-y-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Stored Procedures vs. Functions</h3>
+                        <p class="text-slate-600 mb-6">While both extend PostgreSQL's functionality, procedures and functions have distinct purposes. The choice between them is a strategic decision that impacts performance and architecture. Click on a feature below to compare them directly.</p>
+                        <div class="grid md:grid-cols-2 gap-6" id="proc-func-comparison">
+                            <!-- Left Column: Stored Procedure -->
+                            <div class="border border-slate-200 rounded-lg p-4">
+                                <h4 class="font-bold text-lg text-sky-700 mb-3">Stored Procedure</h4>
+                                <ul class="space-y-2 text-sm">
+                                    <li data-feature="invocation" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Invocation:</strong> Uses the `CALL` statement.</li>
+                                    <li data-feature="return" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Return Value:</strong> Does not return a value directly (uses `INOUT` params).</li>
+                                    <li data-feature="transaction" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Transaction Control:</strong> Can manage transactions internally (`COMMIT`/`ROLLBACK`).</li>
+                                    <li data-feature="usecase" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Use Case:</strong> Complex, multi-step business logic and atomic data modification.</li>
+                                </ul>
+                            </div>
+                            <!-- Right Column: Function -->
+                            <div class="border border-slate-200 rounded-lg p-4">
+                                <h4 class="font-bold text-lg text-purple-700 mb-3">Function</h4>
+                                <ul class="space-y-2 text-sm">
+                                    <li data-feature="invocation" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Invocation:</strong> Used within SQL queries (`SELECT`, `WHERE`).</li>
+                                    <li data-feature="return" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Return Value:</strong> Must return a value or result set.</li>
+                                    <li data-feature="transaction" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Transaction Control:</strong> Cannot manage transactions; part of the calling transaction.</li>
+                                    <li data-feature="usecase" class="p-2 rounded-md cursor-pointer hover:bg-slate-100"><strong>Use Case:</strong> Complex calculations, data retrieval, and custom aggregations.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                         <h3 class="text-xl font-semibold mb-4">Advantages vs. Disadvantages</h3>
+                         <p class="text-slate-600 mb-6">Using stored procedures involves a critical trade-off between performance at the database layer and development agility at the application layer.</p>
+                         <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-lg text-green-600 mb-3">Advantages</h4>
+                                <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                    <li><strong>Performance:</strong> Reduced network traffic as multiple operations execute on the server with a single call.</li>
+                                    <li><strong>Reusability:</strong> Encapsulates logic that can be shared across multiple applications.</li>
+                                    <li><strong>Security:</strong> Granular permissions can be set on procedures without giving access to underlying tables.</li>
+                                    <li><strong>Transactional Integrity:</strong> Ensures complex operations are atomic (all or nothing).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg text-red-600 mb-3">Disadvantages</h4>
+                                <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                    <li><strong>Debugging:</strong> Testing and debugging logic inside the database can be more complex.</li>
+                                    <li><strong>Portability:</strong> Tied to a specific RDBMS (e.g., PL/pgSQL), making migration difficult.</li>
+                                    <li><strong>Versioning:</strong> Harder to version control compared to application code in Git.</li>
+                                    <li><strong>Increased DB Load:</strong> Shifts processing load to the database server, which can become a bottleneck.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- NestJS Implementation Section -->
+            <section id="implementation" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">NestJS Implementation</h2>
+                <div class="space-y-8">
+                     <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Calling Procedures from NestJS</h3>
+                        <p class="text-slate-600 mb-6">In NestJS, you typically use an ORM like TypeORM. To call a stored procedure, you'll need to execute a raw query. This bypasses some of the ORM's abstraction but gives you direct access to database features.</p>
+                        <div class="bg-slate-900 rounded-lg p-4 text-white font-mono text-sm overflow-x-auto">
+<pre><code class="language-typescript">
+import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+
+@Injectable()
+export class SyncService {
+  constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
+  ) {}
+
+  async runSyncProcess(param1: string, param2: number) {
+    try {
+      // Use dataSource.query to execute the CALL statement
+      const result = await this.dataSource.query(
+        'CALL your_sync_procedure($1, $2)',
+        [param1, param2]
+      );
+      return result;
+    } catch (error) {
+      // Robust error handling is crucial
+      console.error('Error executing sync procedure:', error);
+      throw new Error('Data synchronization failed.');
+    }
+  }
+}
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Performance Tuning Section -->
+            <section id="performance" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">Performance Tuning</h2>
+                <div class="space-y-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">PL/pgSQL & Database Best Practices</h3>
+                        <p class="text-slate-600 mb-6">Achieving high read/write performance requires a holistic approach, optimizing both the stored procedure code and the database configuration. Click on each practice to learn more.</p>
+                        <div id="accordion-container" class="space-y-2">
+                            <!-- Accordion items will be injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Concurrency & Deadlocks Section -->
+            <section id="concurrency" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">Concurrency & Deadlocks</h2>
+                <div class="space-y-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Transaction Isolation Levels</h3>
+                        <p class="text-slate-600 mb-6">Choosing the right isolation level is a fundamental trade-off between data consistency and concurrency. Click on a segment of the chart to see details about each level.</p>
+                        <div class="grid md:grid-cols-2 gap-8 items-center">
+                            <div class="chart-container">
+                                <canvas id="isolationLevelChart"></canvas>
+                            </div>
+                            <div id="isolation-details" class="text-sm p-4 bg-slate-50 rounded-lg min-h-[200px]">
+                                <!-- Details will be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">PostgreSQL Locking Mechanisms</h3>
+                        <p class="text-slate-600 mb-6">PostgreSQL offers explicit locking mechanisms to control concurrent data access, which is vital for preventing race conditions and deadlocks.</p>
+                         <div class="grid md:grid-cols-2 gap-8 items-center">
+                            <div class="chart-container h-80 md:h-96">
+                                <canvas id="lockingImpactChart"></canvas>
+                            </div>
+                            <div id="locking-details" class="text-sm p-4 bg-slate-50 rounded-lg min-h-[200px]">
+                                <!-- Details will be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Sync Patterns Section -->
+            <section id="sync-patterns" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">Data Synchronization Patterns</h2>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-4">Which Sync Pattern is Right for You?</h3>
+                    <p class="text-slate-600 mb-6">Stored procedures are just one tool for data sync. Other patterns like CDC, ETL, and Message Queues offer different trade-offs. Use the filters below to find the best pattern for your use case.</p>
+                    
+                    <div class="grid md:grid-cols-3 gap-4 mb-8 p-4 border rounded-lg bg-slate-50">
+                        <div>
+                            <label for="realtime-filter" class="block text-sm font-medium text-slate-700">Real-time Needs</label>
+                            <select id="realtime-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                <option value="any">Any</option>
+                                <option value="real-time">Yes, Real-time</option>
+                                <option value="batch">No, Batch is OK</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="volume-filter" class="block text-sm font-medium text-slate-700">Data Volume</label>
+                            <select id="volume-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                <option value="any">Any</option>
+                                <option value="high">High to Very High</option>
+                                <option value="moderate">Moderate</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="complexity-filter" class="block text-sm font-medium text-slate-700">Architectural Complexity</label>
+                            <select id="complexity-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                <option value="any">Any</option>
+                                <option value="high">Accepts High</option>
+                                <option value="moderate">Prefers Moderate</option>
+                                <option value="low">Prefers Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="sync-patterns-container" class="grid lg:grid-cols-2 gap-6">
+                        <!-- Sync patterns will be populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+             <!-- Recommendations Section -->
+            <section id="recommendations" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 border-b pb-2 mb-6">Key Recommendations</h2>
+                <div class="card p-6">
+                    <ul id="recommendations-list" class="space-y-4 text-slate-600">
+                       <!-- Recs will be injected by JS -->
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Data ---
+    const accordionData = [
+        { title: 'Prioritize Set-Based Operations over Loops', content: 'In PL/pgSQL, loops are much slower than set-based SQL operations. Instead of iterating row-by-row, use `INSERT... SELECT`, `UPDATE... FROM`, and `DELETE... USING` to process data in bulk. This drastically reduces context switching between the procedural and SQL engines, boosting performance for large datasets.' },
+        { title: 'Use Indexes Concurrently and Strategically', content: 'Indexes are crucial for read performance and reducing lock contention. Use `CREATE INDEX CONCURRENTLY` to avoid blocking writes on large tables. Consider partial indexes for common query conditions and covering indexes (with `INCLUDE`) to enable fast index-only scans.' },
+        { title: 'Implement Connection Pooling', content: 'High-concurrency applications should not manage connections directly. Use an external pooler like PgBouncer to manage a pool of active database connections. This reduces the overhead of establishing new connections for every request and prevents the database from being overwhelmed.' },
+        { title: 'Tune `postgresql.conf` and Hardware', content: 'Performance is systemic. Ensure sufficient RAM and fast I/O. Tune key parameters like `shared_buffers` (25-40% of RAM), `max_connections` (in balance with your pooler), and `work_mem`. Regular tuning based on workload is essential.' },
+        { title: 'Maintain the Database with `VACUUM` & `ANALYZE`', content: 'PostgreSQL\'s MVCC model requires regular maintenance. `VACUUM` reclaims space from old rows (dead tuples) to prevent bloat. `ANALYZE` updates statistics for the query planner. Outdated stats lead to poor query plans and longer lock times. `autovacuum` should be enabled and properly tuned.' }
+    ];
+
+    const isolationLevelData = {
+        labels: ['Read Committed', 'Repeatable Read', 'Serializable'],
+        datasets: [{
+            label: 'Concurrency', data: [9, 6, 3],
+            borderColor: 'rgba(54, 162, 235, 1)', backgroundColor: 'rgba(54, 162, 235, 0.2)'
+        }, {
+            label: 'Consistency', data: [5, 7, 10],
+            borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)'
+        }, {
+            label: 'Deadlock Risk', data: [4, 6, 8],
+            borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)'
+        }]
+    };
+    
+    const isolationDetails = [
+        { title: 'Read Committed (Default)', content: 'Offers high concurrency. Transactions only see data committed before their statements begin. This prevents dirty reads but can lead to non-repeatable reads. It has a lower likelihood of deadlocks because locks are held for shorter durations.' },
+        { title: 'Repeatable Read', content: 'Provides a consistent snapshot of data from the start of the transaction. It prevents non-repeatable reads but holds locks for longer, moderately increasing the risk of deadlocks. Good for reporting or multi-step operations needing a stable view.' },
+        { title: 'Serializable', content: 'Highest isolation level, guaranteeing transactions behave as if run sequentially. Prevents all anomalies, including phantom reads. However, it uses aggressive locking, significantly increasing the risk of serialization failures and deadlocks. Use only when absolute data integrity is critical.' }
+    ];
+
+    const lockingData = {
+        labels: ['Row-Level Locks', 'Table-Level Locks', 'Advisory Locks'],
+        datasets: [{
+            label: 'Concurrency Impact (Higher is better)',
+            data: [9, 2, 7],
+            backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 206, 86, 0.6)'],
+            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)'],
+            borderWidth: 1
+        }]
+    };
+
+    const lockingDetails = [
+         { title: 'Row-Level Locks (`FOR UPDATE`/`SHARE`)', content: 'Provides granular control, locking only specific rows. This maximizes concurrency as other transactions can operate on different rows in the same table. `FOR UPDATE` is essential for "read-modify-write" cycles to prevent race conditions. High concurrency impact.' },
+         { title: 'Table-Level Locks (`LOCK TABLE`)', content: 'Locks an entire table, which can serialize operations and severely limit concurrency. This is generally reserved for DDL changes or bulk data loads where exclusive access is required. Very low concurrency impact.' },
+         { title: 'Advisory Locks (`pg_advisory_lock`)', content: 'Application-defined cooperative locks based on integer keys, not tied to tables or rows. They are highly flexible for synchronizing external processes or custom logic, but PostgreSQL does not detect deadlocks for them, shifting that responsibility to the application.' },
+    ];
+    
+    const syncPatterns = [
+        { name: 'Stored Procedures', realtime: 'batch', volume: 'moderate', complexity: 'low',
+          desc: 'Encapsulated SQL logic with strong transactional integrity. Best for atomic, multi-step operations.',
+          pros: ['Reduced network traffic', 'Precompiled performance', 'Strong data consistency'],
+          cons: ['Hard to debug/version', 'Tied to specific DB', 'Can overload database server']
+        },
+        { name: 'Change Data Capture (CDC)', realtime: 'real-time', volume: 'high', complexity: 'moderate',
+          desc: 'Tracks and propagates data changes from database logs. Ideal for real-time replication.',
+          pros: ['Minimal source DB impact', 'Captures all change types', 'Real-time updates'],
+          cons: ['Complex setup', 'Handling rolled-back transactions can be tricky']
+        },
+        { name: 'ETL Tools', realtime: 'batch', volume: 'high', complexity: 'moderate',
+          desc: 'Extract, Transform, and Load data in batches. Built for data warehousing and analytics.',
+          pros: ['Visual data flow design', 'Robust features for transformation', 'Optimized for massive batches'],
+          cons: ['Not real-time', 'Can be expensive', 'Often requires staging data']
+        },
+        { name: 'Message Queues (MQ)', realtime: 'real-time', volume: 'any', complexity: 'high',
+          desc: 'Asynchronous message passing between decoupled services. Powers event-driven architectures.',
+          pros: ['Decouples services', 'High resilience and scalability', 'Natural load balancing'],
+          cons: ['Adds architectural complexity', 'Guaranteed "exactly-once" delivery is hard']
+        }
+    ];
+
+    const recommendations = [
+        "<strong>Strategic Procedure Use:</strong> Reserve stored procedures for critical, multi-step transactions where atomicity and reduced network latency are paramount.",
+        "<strong>Performance-First Code:</strong> Always prioritize set-based SQL operations over procedural loops inside PL/pgSQL for bulk data manipulation.",
+        "<strong>Holistic Database Tuning:</strong> Performance depends on the entire system. Implement connection pooling, tune `postgresql.conf` for your workload, and invest in adequate hardware.",
+        "<strong>Proactive Deadlock Prevention:</strong> Design short transactions, enforce a consistent locking order across your application, and choose the most lenient isolation level that meets your needs.",
+        "<strong>Resilient Application Design:</strong> Build application-level retry logic with exponential backoff to gracefully handle transient errors like deadlocks.",
+        "<strong>Use Complementary Patterns:</strong> Don't rely on a single tool. Combine stored procedures with CDC, ETL, or Message Queues for a robust, scalable, and flexible data synchronization architecture."
+    ];
+
+
+    // --- Navigation ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.content-section');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const sidebarNav = document.getElementById('sidebar-nav');
+
+    function setupNavigation() {
+        const navContainer = mobileMenu;
+        navContainer.innerHTML = sidebarNav.innerHTML;
+
+        const allLinks = document.querySelectorAll('.nav-link');
+        allLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                
+                allLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to all links pointing to the same href (for mobile and desktop sync)
+                document.querySelectorAll(`.nav-link[href="${link.getAttribute('href')}"]`).forEach(l => l.classList.add('active'));
+
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+
+                if (mobileMenu.classList.contains('flex')) {
+                    mobileMenu.classList.remove('flex');
+                    mobileMenu.classList.add('hidden');
+                }
+                window.scrollTo(0, 0);
+            });
+        });
+    }
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        mobileMenu.classList.toggle('flex');
+    });
+
+    // --- Accordion ---
+    function createAccordion() {
+        const container = document.getElementById('accordion-container');
+        if (!container) return;
+        container.innerHTML = accordionData.map((item, index) => `
+            <div class="border border-slate-200 rounded-lg">
+                <button class="accordion-button w-full text-left p-4 flex justify-between items-center font-medium text-slate-800 hover:bg-slate-50">
+                    <span>${item.title}</span>
+                    <span class="transform transition-transform duration-300">&#9662;</span>
+                </button>
+                <div class="accordion-content px-4">
+                    <p class="py-4 text-slate-600">${item.content}</p>
+                </div>
+            </div>
+        `).join('');
+
+        container.querySelectorAll('.accordion-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('span:last-child');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                    document.querySelectorAll('.accordion-button span:last-child').forEach(i => i.style.transform = 'rotate(0deg)');
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+    }
+
+    // --- Charts ---
+    let isolationChart, lockingChart;
+    function createCharts() {
+        const isolationCtx = document.getElementById('isolationLevelChart')?.getContext('2d');
+        if (isolationCtx) {
+            isolationChart = new Chart(isolationCtx, {
+                type: 'radar',
+                data: isolationLevelData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { r: { angleLines: { display: false }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            updateDetails('isolation-details', isolationDetails[index]);
+                        }
+                    }
+                }
+            });
+            updateDetails('isolation-details', { title: 'Click a Label on the Chart', content: 'Select an isolation level like "Read Committed" to see its detailed description, trade-offs, and typical use cases here.'});
+        }
+
+        const lockingCtx = document.getElementById('lockingImpactChart')?.getContext('2d');
+        if (lockingCtx) {
+            lockingChart = new Chart(lockingCtx, {
+                type: 'bar',
+                data: lockingData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Concurrency Impact (Higher is Better)' } },
+                     onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            updateDetails('locking-details', lockingDetails[index]);
+                        }
+                    }
+                }
+            });
+            updateDetails('locking-details', { title: 'Click a Bar on the Chart', content: 'Select a locking mechanism to see its description and impact on application concurrency.'});
+        }
+    }
+
+    function updateDetails(elementId, data) {
+        const container = document.getElementById(elementId);
+        if(container) {
+            container.innerHTML = `<h4 class="font-semibold text-lg mb-2">${data.title}</h4><p>${data.content}</p>`;
+        }
+    }
+    
+    // --- Interactive Comparison ---
+    function setupComparison() {
+        const comparisonContainer = document.getElementById('proc-func-comparison');
+        if (!comparisonContainer) return;
+        comparisonContainer.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', () => {
+                const feature = li.dataset.feature;
+                // Remove highlight from all
+                comparisonContainer.querySelectorAll('li').forEach(item => item.classList.remove('bg-yellow-100', 'ring-2', 'ring-yellow-300'));
+                // Add highlight to matching features
+                comparisonContainer.querySelectorAll(`li[data-feature="${feature}"]`).forEach(item => item.classList.add('bg-yellow-100', 'ring-2', 'ring-yellow-300'));
+            });
+        });
+    }
+
+    // --- Sync Pattern Filter ---
+    const filterSelectors = ['#realtime-filter', '#volume-filter', '#complexity-filter'];
+    
+    function renderSyncPatterns() {
+        const container = document.getElementById('sync-patterns-container');
+        if (!container) return;
+        
+        const realtimeFilter = document.getElementById('realtime-filter').value;
+        const volumeFilter = document.getElementById('volume-filter').value;
+        const complexityFilter = document.getElementById('complexity-filter').value;
+
+        const filtered = syncPatterns.filter(p => {
+            const realtimeMatch = realtimeFilter === 'any' || p.realtime === realtimeFilter;
+            const volumeMatch = volumeFilter === 'any' || p.volume === volumeFilter;
+            const complexityMatch = complexityFilter === 'any' || p.complexity === complexityFilter;
+            return realtimeMatch && volumeMatch && complexityMatch;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No patterns match your criteria. Try broadening your search.</p>`;
+            return;
+        }
+
+        container.innerHTML = filtered.map(p => `
+            <div class="card p-6 border-t-4 border-sky-500">
+                <h4 class="text-xl font-bold mb-2">${p.name}</h4>
+                <p class="text-slate-600 mb-4">${p.desc}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <h5 class="font-semibold text-green-600 mb-1">Pros</h5>
+                        <ul class="list-disc list-inside space-y-1">
+                            ${p.pros.map(pro => `<li>${pro}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-red-600 mb-1">Cons</h5>
+                        <ul class="list-disc list-inside space-y-1">
+                             ${p.cons.map(con => `<li>${con}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function setupSyncFilters() {
+        filterSelectors.forEach(selector => {
+            const el = document.querySelector(selector);
+            if (el) el.addEventListener('change', renderSyncPatterns);
+        });
+        renderSyncPatterns();
+    }
+    
+    // --- Recommendations list ---
+    function renderRecommendations() {
+        const list = document.getElementById('recommendations-list');
+        if (!list) return;
+        list.innerHTML = recommendations.map(rec => `
+            <li class="flex items-start">
+                <span class="text-green-500 mr-3 mt-1">&#10003;</span>
+                <span>${rec}</span>
+            </li>
+        `).join('');
+    }
+
+    // --- Initializations ---
+    setupNavigation();
+    createAccordion();
+    createCharts();
+    setupComparison();
+    setupSyncFilters();
+    renderRecommendations();
+ // Function to convert backticks to bold text
+        function convertBackticksToBold(text) {
+            // Replace double backticks first
+            text = text.replace(/``(.*?)``/g, '<strong>$1</strong>');
+            // Replace single backticks
+            text = text.replace(/`([^`]+)`/g, '<strong>$1</strong>');
+            return text;
+        }
+
+        // Process all text nodes in the document
+        function processTextNodes(node) {
+            if (node.nodeType === 3) { // Text node
+                const newText = convertBackticksToBold(node.textContent);
+                if (newText !== node.textContent) {
+                    const span = document.createElement('span');
+                    span.innerHTML = newText;
+                    node.parentNode.replaceChild(span, node);
+                }
+            } else if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                // Skip script and style tags but process all other nodes
+                Array.from(node.childNodes).forEach(processTextNodes);
+            }
+        }
+
+        // Run the conversion when the document is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            processTextNodes(document.body);
+        });
+
+});
+</script>
+</body>
+</html>
